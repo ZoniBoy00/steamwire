@@ -17,6 +17,7 @@ use crate::messages::{Packet, ProtoMsg};
 
 /// A message from a game coordinator (`ClientFromGC`).
 #[derive(Clone, Debug)]
+#[non_exhaustive]
 pub struct GcMessage {
     /// The app whose GC sent it.
     pub app_id: u32,

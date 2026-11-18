@@ -164,6 +164,7 @@ pub enum HttpMethod {
 
 /// A protobuf Web API response with its `x-eresult` header.
 #[derive(Clone, Debug)]
+#[non_exhaustive]
 pub struct WebApiResponse<T> {
     /// The result Steam reported (`Invalid` if there was none).
     pub result: EResult,

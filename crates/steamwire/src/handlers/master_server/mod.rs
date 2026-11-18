@@ -43,6 +43,7 @@ pub struct QueryDetails {
 
 /// A server from a query.
 #[derive(Clone, Debug)]
+#[non_exhaustive]
 pub struct Server {
     /// The query address.
     pub endpoint: SocketAddr,

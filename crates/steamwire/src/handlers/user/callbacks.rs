@@ -52,6 +52,7 @@ impl UserCallback {
 
 /// One marketing message.
 #[derive(Clone, Debug)]
+#[non_exhaustive]
 pub struct MarketingMessage {
     /// The message ID.
     pub id: GlobalId,
@@ -63,6 +64,7 @@ pub struct MarketingMessage {
 
 /// The marketing messages list.
 #[derive(Clone, Debug)]
+#[non_exhaustive]
 pub struct MarketingMessages {
     /// When the list was updated.
     pub update_time: SystemTime,

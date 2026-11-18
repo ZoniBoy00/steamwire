@@ -34,6 +34,9 @@ pub mod user;
 pub mod user_stats;
 pub mod workshop;
 
+#[cfg(test)]
+mod tests;
+
 use crate::messages::Packet;
 
 /// Generates a callback enum whose variants wrap decoded protobuf bodies,

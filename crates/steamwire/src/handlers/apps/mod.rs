@@ -37,6 +37,7 @@ impl From<u32> for PicsRequest {
 
 /// One app or package from a PICS product info response.
 #[derive(Clone, Debug)]
+#[non_exhaustive]
 pub struct PicsProductInfo {
     /// App or package ID.
     pub id: u32,
@@ -52,6 +53,7 @@ pub struct PicsProductInfo {
 
 /// The combined result of a PICS product info request.
 #[derive(Clone, Debug, Default)]
+#[non_exhaustive]
 pub struct PicsProductInfoResult {
     /// Apps by ID.
     pub apps: BTreeMap<u32, PicsProductInfo>,

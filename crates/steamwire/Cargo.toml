@@ -10,15 +10,26 @@ readme = "../../README.md"
 keywords = ["steam", "steamkit", "steamkit2", "valve", "protocol"]
 categories = ["api-bindings", "network-programming", "games"]
 # The fixtures are only for the repository's tests.
-exclude = ["tests/data"]
+exclude = ["tests/data", "benches"]
+
+[features]
+default = ["native-tls"]
+# TLS for the WebSocket transport, the Web API and the CDN: the system's
+# (SChannel, Secure Transport or OpenSSL) or rustls with the platform's
+# certificate store. One of them is needed for WebSocket and HTTPS.
+native-tls = ["tokio-tungstenite/native-tls", "reqwest/native-tls"]
+rustls = ["tokio-tungstenite/rustls-tls-native-roots", "reqwest/rustls"]
+
+[package.metadata.docs.rs]
+all-features = true
 
 [dependencies]
 steamwire-protos = { path = "../steamwire-protos", version = "0.1.0" }
 prost.workspace = true
 tokio.workspace = true
-tokio-tungstenite = { version = "0.30", features = ["native-tls"] }
+tokio-tungstenite = "0.30"
 futures-util = { version = "0.3", default-features = false, features = ["sink", "std"] }
-reqwest = { version = "0.13", default-features = false, features = ["json", "native-tls", "query", "form"] }
+reqwest = { version = "0.13", default-features = false, features = ["json", "query", "form"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 thiserror = "2"
@@ -54,3 +65,8 @@ windows = { version = "0.62", features = [
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 qrcode = { version = "0.14", default-features = false }
 rpassword = "7"
+criterion = { version = "0.8", default-features = false }
+
+[[bench]]
+name = "codecs"
+harness = false

@@ -72,12 +72,14 @@ crates/
       types/            SteamId, GameId, GlobalId, JobId, KeyValues
       util/             LZMA, VZip/VZstd/zip, crypto, IP helpers, machine ID
       webapi/           Web API client and CM directory
-    examples/           anonymous, cdn_download, handlers_tour, live_checks, account_checks, account_changes,
-                        qr_login, service_call, webapi
+    examples/           anonymous, bot, cdn_download, depot_download, handlers_tour, live_checks, account_checks,
+                        account_changes, machine_info, qr_login, service_call, webapi
+    benches/            criterion benchmarks of the codecs
     tests/              CDN fixtures (tests/data/cdn), PICS captures (tests/data/pics),
-                        SteamKit2 VZip output (tests/data/vzip)
+                        SteamKit2 VZip output (tests/data/vzip), parser robustness tests
   steamwire-tools/      NetHook analyzer and protobuf dumper (library + CLI)
   steamwire-nethook/    NetHook2 DLL (Windows only)
+fuzz/                   cargo-fuzz targets (not in the workspace)
 ```
 
 ## Examples
@@ -88,6 +90,9 @@ cargo run -p steamwire --example anonymous -- tcp          # over encrypted TCP
 cargo run -p steamwire --example anonymous -- udp          # over encrypted UDP
 NETHOOK=1 cargo run -p steamwire --example anonymous       # also dump every message
 cargo run -p steamwire --example cdn_download              # Spacewar's manifest and files from the CDN
+cargo run --release -p steamwire --example depot_download  # a whole depot, updated in place on later runs
+cargo run -p steamwire --example bot                       # chat bot that reconnects; --token-file keeps the logon
+cargo run -p steamwire --example machine_info              # what the machine ID is made of here
 cargo run -p steamwire --example handlers_tour             # a call to each handler
 cargo run -p steamwire --example live_checks               # anonymous + game server checks, options
 cargo run -p steamwire --example account_checks            # checks that need your account (QR login)
@@ -179,16 +184,32 @@ while let Some(steamwire::Event::Message(packet)) = events.recv().await {
 }
 ```
 
-## Building
+## Features
+
+- `native-tls` (default): TLS for WebSocket, the Web API and the CDN from
+  the system (SChannel, Secure Transport, OpenSSL on Linux).
+- `rustls`: rustls with the platform's certificate store instead, so no
+  system TLS library is needed (static and musl builds):
+  `steamwire = { version = "0.1", default-features = false, features = ["rustls"] }`.
+
+Without either, TCP and UDP connections still work, but WebSocket and HTTPS
+don't.
+
+## Building and testing
 
 ```sh
 cargo build
-cargo test
+cargo test --workspace                                   # no network needed
+cargo bench -p steamwire --bench codecs                  # chunk, VZip, KeyValues, encryption throughput
+STEAMWIRE_ROUNDS=100000 cargo test -p steamwire --test robustness   # a longer parser search
+cargo +nightly fuzz run packet                           # in fuzz/: packet, key_values, manifest, compression
 ```
 
 Requires Rust 1.89+. `protoc` is vendored, so nothing else is needed. On Linux,
-TLS uses OpenSSL (`libssl-dev`, `pkg-config`). `steamwire-nethook` is empty on
-non-Windows targets.
+the default TLS uses OpenSSL (`libssl-dev`, `pkg-config`). `steamwire-nethook` is
+empty on non-Windows targets. CI runs the tests on Windows, Linux and macOS,
+clippy, docs, the MSRV build, the 16 MiB VZip comparison and each fuzz
+target for a minute.
 
 The crate denies unsafe code; the only exception is the Windows machine ID
 queries in `util/hardware.rs` (registry, adapters, disk serial).
@@ -198,6 +219,13 @@ bodies are `Bytes` slices of the buffer they arrived in, and channel
 encryption keys its AES and HMAC state once per connection. The LZMA
 decoder and encoder run in debug builds too, but for large depots build with
 `--release`.
+
+## Versioning
+
+Semantic versioning, with [CHANGELOG.md](CHANGELOG.md). Before 1.0 a minor
+release may change the API. Types that Steam may extend (callbacks, events,
+results, `Error`) are `#[non_exhaustive]`, so new fields and variants don't
+break code that matches on them.
 
 ## Known differences
 
@@ -216,7 +244,8 @@ decoder and encoder run in debug builds too, but for large depots build with
   and persona state (`account_checks`); and between two accounts friend
   requests, removal, blocking, chat messages, persona names, lobby invites,
   joins and owner changes, plus creating leaderboards, free licenses and
-  the TF2 game coordinator (`account_changes`).
+  the TF2 game coordinator (`account_changes`), the rustls feature, and
+  whole-depot downloads with updates (`depot_download`).
 - Tested only offline: the legacy chat rooms (`join_chat`,
   `send_chat_room_message`, kick/ban; replaced by Steam's newer chat),
   `share_file` (needs a Steam Cloud file), `SharedSecretAuthenticator`

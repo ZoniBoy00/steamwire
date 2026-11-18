@@ -68,6 +68,7 @@ async fn main() -> steamwire::Result<()> {
                 println!("disconnected (user initiated: {user_initiated})");
                 break;
             }
+            _ => {}
         }
     }
     Ok(())

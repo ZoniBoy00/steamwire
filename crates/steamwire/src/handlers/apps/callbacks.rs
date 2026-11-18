@@ -75,6 +75,7 @@ impl AppsCallback {
 
 /// The depot section of a private beta branch.
 #[derive(Clone, Debug)]
+#[non_exhaustive]
 pub struct PrivateBeta {
     /// The result.
     pub result: EResult,
@@ -96,6 +97,7 @@ impl PrivateBeta {
 
 /// The guest passes of the account.
 #[derive(Clone, Debug)]
+#[non_exhaustive]
 pub struct GuestPassList {
     /// The result.
     pub result: EResult,
@@ -129,6 +131,7 @@ impl GuestPassList {
 
 /// A legacy CD key.
 #[derive(Clone, Debug)]
+#[non_exhaustive]
 pub struct LegacyGameKey {
     /// The result.
     pub result: EResult,

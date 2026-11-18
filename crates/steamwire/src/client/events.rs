@@ -5,6 +5,7 @@ use crate::messages::Packet;
 
 /// Something that happened on the connection.
 #[derive(Debug, Clone)]
+#[non_exhaustive]
 pub enum Event {
     /// A message that no job or waiter consumed.
     Message(Packet),

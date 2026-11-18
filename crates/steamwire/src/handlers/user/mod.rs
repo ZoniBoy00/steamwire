@@ -118,6 +118,7 @@ pub fn default_os_type() -> EOSType {
 
 /// The result of a successful logon.
 #[derive(Clone, Debug)]
+#[non_exhaustive]
 pub struct LoggedOn {
     /// The Steam ID of the session.
     pub steam_id: SteamId,

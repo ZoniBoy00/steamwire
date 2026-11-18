@@ -99,6 +99,7 @@ impl AuthTicketState {
 
 /// An active ticket. Dropping it cancels the ticket.
 #[derive(Debug)]
+#[non_exhaustive]
 pub struct TicketInfo {
     client: SteamClient,
     app_id: u32,

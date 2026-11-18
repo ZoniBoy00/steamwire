@@ -21,6 +21,7 @@ pub type Metadata = BTreeMap<String, String>;
 
 /// A lobby member.
 #[derive(Clone, Debug, PartialEq)]
+#[non_exhaustive]
 pub struct Member {
     /// The member.
     pub steam_id: SteamId,
@@ -32,6 +33,7 @@ pub struct Member {
 
 /// A lobby (SteamKit2's `SteamMatchmaking.Lobby`).
 #[derive(Clone, Debug, PartialEq)]
+#[non_exhaustive]
 pub struct Lobby {
     /// The lobby.
     pub steam_id: SteamId,
@@ -307,6 +309,7 @@ pub(crate) fn lobby_data(body: &CMsgClientMmsLobbyData, cache: &LobbyCache) -> L
 
 /// The result of joining a lobby.
 #[derive(Clone, Debug)]
+#[non_exhaustive]
 pub struct JoinLobby {
     /// The app.
     pub app_id: u32,

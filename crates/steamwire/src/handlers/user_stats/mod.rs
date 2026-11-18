@@ -34,6 +34,7 @@ impl UserStatsCallback {
 
 /// A leaderboard.
 #[derive(Clone, Debug)]
+#[non_exhaustive]
 pub struct Leaderboard {
     /// The leaderboard ID.
     pub id: i32,
@@ -47,6 +48,7 @@ pub struct Leaderboard {
 
 /// A leaderboard entry.
 #[derive(Clone, Debug)]
+#[non_exhaustive]
 pub struct LeaderboardEntry {
     /// The rank.
     pub global_rank: i32,

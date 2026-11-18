@@ -19,6 +19,7 @@ use crate::types::{GameId, SteamId};
 
 /// What's known about a user.
 #[derive(Clone, Debug, Default)]
+#[non_exhaustive]
 pub struct Friend {
     /// The user.
     pub steam_id: SteamId,
@@ -57,6 +58,7 @@ pub fn avatar_url(hash: &[u8]) -> Option<String> {
 
 /// What's known about a clan (group).
 #[derive(Clone, Debug, Default)]
+#[non_exhaustive]
 pub struct Clan {
     /// The clan.
     pub steam_id: SteamId,
@@ -114,7 +116,7 @@ impl FriendsCache {
             }
             EMsg::ClientPersonaState => {
                 if let Ok(state) = packet.decode::<CMsgClientPersonaState>() {
-                    self.handle_persona_state(state);
+                    self.handle_persona_state(client.steam_id(), state);
                 }
             }
             _ => {}
@@ -171,12 +173,20 @@ impl FriendsCache {
         }
     }
 
-    fn handle_persona_state(&self, state: CMsgClientPersonaState) {
+    fn handle_persona_state(&self, local: Option<SteamId>, state: CMsgClientPersonaState) {
         let flags = EClientPersonaStateFlag(state.status_flags() as i32);
         let mut inner = self.inner.lock().unwrap();
         for friend in &state.friends {
             let id = SteamId::from_u64(friend.friendid());
-            if id.is_individual_account() {
+            if Some(id) == local {
+                // SteamKit2's cache returns its LocalUser for our own ID.
+                if flags.contains(EClientPersonaStateFlag::PlayerName) {
+                    inner.local_name.clone_from(&friend.player_name);
+                }
+                if flags.contains(EClientPersonaStateFlag::Presence) {
+                    inner.local_state = EPersonaState(friend.persona_state() as i32);
+                }
+            } else if id.is_individual_account() {
                 let user = inner.user(id);
                 if flags.contains(EClientPersonaStateFlag::PlayerName) {
                     user.name.clone_from(&friend.player_name);

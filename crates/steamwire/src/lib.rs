@@ -11,6 +11,7 @@
 //! # Ok(()) }
 //! ```
 
+#![warn(missing_docs)]
 #![warn(missing_debug_implementations)]
 // Unsafe only in the Windows machine ID queries (`util::hardware`).
 #![deny(unsafe_code)]

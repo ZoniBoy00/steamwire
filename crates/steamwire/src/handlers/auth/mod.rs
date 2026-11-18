@@ -79,6 +79,7 @@ impl AuthSessionDetails {
 
 /// The tokens issued when an auth session completes.
 #[derive(Clone, Debug)]
+#[non_exhaustive]
 pub struct AuthTokens {
     /// The account name.
     pub account_name: String,

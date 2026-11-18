@@ -120,6 +120,7 @@ impl FriendsCallback {
 
 /// A batch of persona updates.
 #[derive(Clone, Debug)]
+#[non_exhaustive]
 pub struct PersonaState {
     /// Which fields the entries carry.
     pub flags: EClientPersonaStateFlag,
@@ -129,6 +130,7 @@ pub struct PersonaState {
 
 /// A message in a friend's chat history.
 #[derive(Clone, Debug)]
+#[non_exhaustive]
 pub struct FriendMessage {
     /// Who sent it.
     pub sender: SteamId,
@@ -142,6 +144,7 @@ pub struct FriendMessage {
 
 /// Recent chat history with a friend.
 #[derive(Clone, Debug)]
+#[non_exhaustive]
 pub struct FriendMessageHistory {
     /// The result.
     pub result: EResult,
@@ -173,6 +176,7 @@ impl FriendMessageHistory {
 
 /// A chat room member, as sent in binary KeyValues.
 #[derive(Clone, Debug)]
+#[non_exhaustive]
 pub struct ChatMember {
     /// The raw KeyValues (`SteamID`, `Permissions`, `Details`).
     pub key_values: KeyValue,
@@ -204,6 +208,7 @@ impl ChatMember {
 
 /// The result of joining a chat room.
 #[derive(Clone, Debug)]
+#[non_exhaustive]
 pub struct ChatEnter {
     /// The room.
     pub chat_room: SteamId,
@@ -259,6 +264,7 @@ impl ChatEnter {
 
 /// A chat room message.
 #[derive(Clone, Debug)]
+#[non_exhaustive]
 pub struct ChatMsg {
     /// The sender.
     pub chatter: SteamId,
@@ -272,6 +278,7 @@ pub struct ChatMsg {
 
 /// A member entered, left, was kicked, ...
 #[derive(Clone, Debug)]
+#[non_exhaustive]
 pub struct StateChange {
     /// Who it happened to.
     pub acted_on: SteamId,
@@ -300,6 +307,7 @@ impl StateChange {
 
 /// `ClientChatMemberInfo`.
 #[derive(Clone, Debug)]
+#[non_exhaustive]
 pub struct ChatMemberInfo {
     /// The room.
     pub chat_room: SteamId,
@@ -311,6 +319,7 @@ pub struct ChatMemberInfo {
 
 /// `ClientChatRoomInfo`.
 #[derive(Clone, Debug)]
+#[non_exhaustive]
 pub struct ChatRoomInfo {
     /// The room.
     pub chat_room: SteamId,
@@ -320,6 +329,7 @@ pub struct ChatRoomInfo {
 
 /// The result of a kick, ban, ...
 #[derive(Clone, Debug)]
+#[non_exhaustive]
 pub struct ChatActionResult {
     /// The room.
     pub chat_room: SteamId,
@@ -333,6 +343,7 @@ pub struct ChatActionResult {
 
 /// The result of ignoring a friend.
 #[derive(Clone, Debug)]
+#[non_exhaustive]
 pub struct IgnoreFriend {
     /// The user.
     pub friend: SteamId,

@@ -127,6 +127,7 @@ pub fn notification_method(packet: &Packet) -> Option<&str> {
 /// # Ok(()) }
 /// ```
 #[derive(Clone, Debug)]
+#[non_exhaustive]
 pub struct ServiceNotification {
     /// The method, `Service.Method#version`.
     pub method: String,

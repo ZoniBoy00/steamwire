@@ -1,6 +1,7 @@
 [workspace]
 resolver = "2"
 members = ["crates/steamwire-protos", "crates/steamwire", "crates/steamwire-tools", "crates/steamwire-nethook"]
+exclude = ["fuzz"]
 
 [workspace.package]
 version = "0.1.0"

@@ -13,6 +13,7 @@ use crate::error::{Error, Result};
 
 /// A token for CDN servers that need one.
 #[derive(Clone, Debug)]
+#[non_exhaustive]
 pub struct CdnAuthToken {
     /// The token, appended to chunk URLs.
     pub token: String,
