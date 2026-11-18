@@ -133,7 +133,7 @@ impl Inventory {
 /// be current, and nothing otherwise. Never an old copy taken for a current one.
 ///
 /// The copy is current from a cache of the account (`CacheSubscribed`, alone or in a welcome) until anything says it
-/// may not be: the session ended, messages were dropped or couldn't be read (an item among them too), the game
+/// may not be: the session ended, a message or an item in it couldn't be read, the game
 /// coordinator unsubscribed the cache or holds another version of it, or welcomed the account again without it.
 /// Changes that come meanwhile aren't applied: the next cache replaces the copy whole, and what it changed comes out as
 /// changes.
