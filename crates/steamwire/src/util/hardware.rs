@@ -66,7 +66,7 @@ pub fn machine_name() -> String {
         .or_else(|| std::fs::read_to_string("/etc/hostname").ok().map(|h| h.trim().to_owned()))
         .or_else(|| std::env::var("HOSTNAME").ok())
         .filter(|h| !h.is_empty())
-        .unwrap_or_else(|| "steamkit-rs".into())
+        .unwrap_or_else(|| "steamwire".into())
 }
 
 /// The first two MAC addresses, each padded to 8 bytes, with zeros for
