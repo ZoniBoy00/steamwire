@@ -9,6 +9,18 @@ rust-version.workspace = true
 license.workspace = true
 repository.workspace = true
 
+[features]
+# The game coordinator messages of each game and the web UI services, as in
+# SteamKit2 (`SteamKit2.GC.*.Internal`, `SteamKit2.WebUI.Internal`).
+csgo = []
+dota2 = []
+tf2 = []
+deadlock = []
+webui = []
+
+[package.metadata.docs.rs]
+all-features = true
+
 [dependencies]
 prost.workspace = true
 

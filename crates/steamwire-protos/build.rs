@@ -29,6 +29,79 @@ fn main() {
 
     compile("steam", &steam_files, &[&steam_dir, &protoc_include], &out_dir, Some(Box::new(Services::default())));
     compile("gc", &[proto_root.join("gc.proto")], &[&proto_root, &protoc_include], &out_dir, None);
+
+    // The games' GC messages and the web UI services, as SteamKit2's
+    // `SteamKit2.GC.*.Internal` and `SteamKit2.WebUI.Internal`, each behind
+    // its feature.
+    for set in ["csgo", "dota2", "tf2", "deadlock", "webui"] {
+        if std::env::var_os(format!("CARGO_FEATURE_{}", set.to_uppercase())).is_none() {
+            continue;
+        }
+        let services: Option<Box<dyn ServiceGenerator>> =
+            if set == "webui" { Some(Box::new(Services::default())) } else { None };
+        let stripped = strip_set(&proto_root.join(set), &out_dir.join("stripped").join(set));
+        compile(set, &stripped, &[&out_dir.join("stripped").join(set), &protoc_include], &out_dir, services);
+    }
+}
+
+/// Copies the `.proto` files of `from` to `to` without Valve's own
+/// `descriptor.proto` options (`boxed_type`, `synthetic_default`,
+/// `additional_includes`), which only their fork of `descriptor.proto`
+/// defines; protoc's own include is used instead. Returns the copies.
+fn strip_set(from: &Path, to: &Path) -> Vec<PathBuf> {
+    std::fs::create_dir_all(to).unwrap();
+    let mut files = Vec::new();
+    for entry in std::fs::read_dir(from).unwrap() {
+        let path = entry.unwrap().path();
+        if path.extension().is_none_or(|e| e != "proto") {
+            continue;
+        }
+        let text = std::fs::read_to_string(&path).unwrap();
+        let out = to.join(path.file_name().unwrap());
+        std::fs::write(&out, strip_valve_options(&text)).unwrap();
+        files.push(out);
+    }
+    files.sort();
+    files
+}
+
+fn strip_valve_options(text: &str) -> String {
+    let mut out = String::with_capacity(text.len());
+    for line in text.lines() {
+        if line.trim_start().starts_with("option additional_includes") {
+            continue;
+        }
+        let mut line = line.to_owned();
+        for name in ["boxed_type", "synthetic_default"] {
+            while let Some(range) = option_range(&line, name) {
+                line.replace_range(range, "");
+            }
+        }
+        out.push_str(&line);
+        out.push('\n');
+    }
+    out
+}
+
+/// Where `name = "…"` is in `line`, with the comma that separates it from
+/// another option, or its brackets (and the space before them) when it is
+/// the only one.
+fn option_range(line: &str, name: &str) -> Option<std::ops::Range<usize>> {
+    let start = line.find(name)?;
+    let rest = &line[start + name.len()..];
+    let value = rest.trim_start().strip_prefix('=')?.trim_start().strip_prefix('"')?;
+    let end = line.len() - value.len() + value.find('"')? + 1;
+    let before = line[..start].trim_end();
+    let after = line[end..].trim_start();
+    Some(if let Some(head) = before.strip_suffix(',') {
+        head.len()..end
+    } else if let Some(next) = after.strip_prefix(',') {
+        start..line.len() - next.trim_start().len()
+    } else if before.ends_with('[') && after.starts_with(']') {
+        before.trim_end_matches('[').trim_end().len()..line.len() - after.len() + 1
+    } else {
+        start..end
+    })
 }
 
 fn compile(

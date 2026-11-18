@@ -41,6 +41,8 @@ jobs:
       - run: cargo clippy --workspace --all-targets
       - run: cargo clippy -p steamwire --no-default-features --all-targets
       - run: cargo clippy -p steamwire-community --no-default-features --all-targets
+      # The game and web UI proto sets (off by default).
+      - run: cargo clippy -p steamwire-protos --all-features
       - run: cargo doc --workspace --no-deps --all-features
         env:
           RUSTDOCFLAGS: -D warnings
