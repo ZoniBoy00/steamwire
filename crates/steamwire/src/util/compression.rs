@@ -105,11 +105,18 @@ pub fn vzip_compress(buffer: &[u8]) -> Vec<u8> {
     out
 }
 
+/// The largest VZip delta output accepted.
+const MAX_DELTA_SIZE: usize = 64 << 20;
+
 /// Decompresses a VZip delta (`VZd`): LZMA data whose matches may refer to
 /// `source`, the previous version of the chunk (SteamKit2's
 /// `VZipDeltaUtil`).
 pub fn vzip_delta_decompress(buffer: &[u8], source: &[u8]) -> Result<Vec<u8>> {
     let frame = vzip_frame(buffer, b'd')?;
+    // The size comes from the footer; depot chunks are at most a few MiB.
+    if frame.size > MAX_DELTA_SIZE {
+        return Err(invalid(format!("VZip delta claims {} bytes", frame.size)));
+    }
     let mut window = vec![0u8; source.len() + frame.size];
     window[..source.len()].copy_from_slice(source);
     super::lzma::decode_with_dictionary(frame.props, frame.compressed, &mut window, source.len())?;
@@ -192,7 +199,7 @@ pub fn zip_decompress(buffer: &[u8], verify_checksum: bool) -> Result<Vec<u8>> {
     let out = match method {
         0 => data.to_vec(),
         8 => {
-            let mut out = Vec::with_capacity(size);
+            let mut out = Vec::with_capacity(size.min(16 << 20));
             flate2::read::DeflateDecoder::new(data)
                 .read_to_end(&mut out)
                 .map_err(|e| invalid(format!("deflate: {e}")))?;

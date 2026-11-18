@@ -76,7 +76,7 @@ impl MarketingMessages {
     fn parse(packet: &Packet) -> Option<Self> {
         let msg = ClientMsg::<MsgClientMarketingMessageUpdate2>::from_packet(packet).ok()?;
         let mut r = Reader::new(&msg.payload);
-        let mut messages = Vec::with_capacity(msg.body.count as usize);
+        let mut messages = Vec::with_capacity((msg.body.count as usize).min(64));
         for _ in 0..msg.body.count {
             let len = r.i32().ok()?.checked_sub(4)? as usize;
             let mut item = Reader::new(r.bytes(len).ok()?);

@@ -327,8 +327,10 @@ pub fn split_multi_raw(packet: &Packet) -> Result<Vec<Bytes>> {
     let size_unzipped = multi.size_unzipped();
     let body = multi.message_body.unwrap_or_default();
     let payload = if size_unzipped > 0 {
-        let mut out = Vec::with_capacity(size_unzipped as usize);
-        flate2::read::GzDecoder::new(body.as_slice()).read_to_end(&mut out)?;
+        // The size is only a hint for the buffer, and caps the output: it
+        // comes from the message, so it may be anything.
+        let mut out = Vec::with_capacity((size_unzipped as usize).min(1 << 20));
+        flate2::read::GzDecoder::new(body.as_slice()).take(size_unzipped.into()).read_to_end(&mut out)?;
         out
     } else {
         body

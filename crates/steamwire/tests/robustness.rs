@@ -16,6 +16,42 @@ use steamwire::util::compression::{vzip_compress, vzip_decompress, vzip_delta_de
 use steamwire::util::lzma;
 use steamwire::{EMsg, SteamId};
 
+/// Fails the test on any single allocation over 256 MiB: a length field
+/// from the input must not decide how much memory is reserved.
+struct LimitedAllocator;
+
+const ALLOCATION_LIMIT: usize = 256 << 20;
+
+unsafe impl std::alloc::GlobalAlloc for LimitedAllocator {
+    unsafe fn alloc(&self, layout: std::alloc::Layout) -> *mut u8 {
+        if layout.size() > ALLOCATION_LIMIT {
+            // Allocation failure aborts the process, so say where it was.
+            eprintln!(
+                "allocation of {} bytes at:
+{}",
+                layout.size(),
+                std::backtrace::Backtrace::force_capture()
+            );
+            return std::ptr::null_mut();
+        }
+        unsafe { std::alloc::System.alloc(layout) }
+    }
+
+    unsafe fn dealloc(&self, ptr: *mut u8, layout: std::alloc::Layout) {
+        unsafe { std::alloc::System.dealloc(ptr, layout) }
+    }
+
+    unsafe fn realloc(&self, ptr: *mut u8, layout: std::alloc::Layout, new_size: usize) -> *mut u8 {
+        if new_size > ALLOCATION_LIMIT {
+            return std::ptr::null_mut();
+        }
+        unsafe { std::alloc::System.realloc(ptr, layout, new_size) }
+    }
+}
+
+#[global_allocator]
+static ALLOCATOR: LimitedAllocator = LimitedAllocator;
+
 /// Inputs per target; `STEAMWIRE_ROUNDS` raises it for a longer search.
 fn rounds() -> usize {
     std::env::var("STEAMWIRE_ROUNDS").ok().and_then(|r| r.parse().ok()).unwrap_or(3000)
@@ -108,7 +144,12 @@ fn packets() {
     )
     .encode();
     let pics = fixture("pics/002_in_8904_k_EMsgClientPICSProductInfoResponse_app480.bin");
-    check("packet", &[heartbeat, multi, pics], |data| {
+    // Found by cargo-fuzz: made the parser reserve gigabytes.
+    let oom = vec![
+        0x41, 0x2, 0x0, 0xad, 0x0, 0x0, 0x0, 0x0, 0x38, 0x0, 0x8, 0x8, 0x8, 0x8, 0x8, 0x8, 0x8, 0x8, 0x8, 0x8, 0x8,
+        0x8, 0x8, 0xff, 0xff, 0xff, 0xff, 0xff, 0xe8, 0xfa, 0xff, 0x32,
+    ];
+    check("packet", &[oom, heartbeat, multi, pics], |data| {
         if let Ok(packet) = Packet::parse(data.to_vec().into()) {
             let _ = split_multi(&packet);
             let _ = packet.encode();

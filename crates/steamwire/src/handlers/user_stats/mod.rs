@@ -145,7 +145,7 @@ impl SteamClient {
                 score: e.score(),
                 steam_id: SteamId::from_u64(e.steam_id_user()),
                 ugc_id: UgcHandle::from(e.ugc_id()),
-                details: e.details().chunks_exact(4).map(|c| i32::from_le_bytes(c.try_into().unwrap())).collect(),
+                details: e.details().as_chunks::<4>().0.iter().map(|c| i32::from_le_bytes(*c)).collect(),
             })
             .collect())
     }
