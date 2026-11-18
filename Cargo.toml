@@ -1,0 +1,13 @@
+[workspace]
+resolver = "2"
+members = ["crates/steamkit-protos", "crates/steamkit", "crates/steamkit-tools", "crates/steamkit-nethook"]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.89"
+license = "LGPL-2.1-only"
+
+[workspace.dependencies]
+prost = "0.14"
+tokio = { version = "1", features = ["full"] }
