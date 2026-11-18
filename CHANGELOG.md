@@ -28,6 +28,10 @@ version.
   mobile confirmations, adding and removing the mobile authenticator
   (`.maFile`), and the account cart with wallet-only purchases. Example
   `community_checks` (read-only live checks).
+- `types::ShareCode`: CS2 match share codes, from SteamHelper-rs.
+- The default logon `machine_name` and auth `device_friendly_name` are
+  "{machine name} (steamwire)", as SteamKit2 appends " (SteamKit2)"; Linux
+  lists network adapters in directory order, as SteamKit2 does.
 - Offline handler tests on a loopback client, parser robustness tests,
   cargo-fuzz targets (`fuzz/`) and criterion benchmarks.
 

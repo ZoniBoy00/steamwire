@@ -85,7 +85,7 @@ impl Default for LogOnDetails {
             client_os_type: default_os_type(),
             client_language: "english".into(),
             cell_id: None,
-            machine_name: hardware::machine_name(),
+            machine_name: format!("{} (steamwire)", hardware::machine_name()),
             login_id: None,
             chat_mode: ChatMode::Default,
             ui_mode: EUIMode::Unknown,

@@ -334,8 +334,8 @@ mod platform {
 
     fn mac_addresses(physical_only: bool) -> Vec<Vec<u8>> {
         let Ok(dir) = std::fs::read_dir("/sys/class/net") else { return Vec::new() };
-        let mut names: Vec<_> = dir.filter_map(|e| e.ok()).map(|e| e.file_name()).collect();
-        names.sort();
+        // In directory order, unsorted, as SteamKit2's `Directory.GetDirectories`.
+        let names: Vec<_> = dir.filter_map(|e| e.ok()).map(|e| e.file_name()).collect();
         let macs: Vec<Vec<u8>> = names
             .iter()
             .filter(|n| !physical_only || Path::new("/sys/class/net").join(n).join("device").exists())

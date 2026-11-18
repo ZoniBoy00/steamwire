@@ -53,10 +53,7 @@ pub struct AuthSessionDetails {
 impl Default for AuthSessionDetails {
     fn default() -> Self {
         Self {
-            device_friendly_name: std::env::var("COMPUTERNAME")
-                .or_else(|_| std::env::var("HOSTNAME"))
-                .map(|h| format!("{h} (steamwire)"))
-                .unwrap_or_else(|_| "steamwire".into()),
+            device_friendly_name: format!("{} (steamwire)", crate::util::hardware::machine_name()),
             platform_type: EAuthTokenPlatformType::KEAuthTokenPlatformTypeSteamClient,
             os_type: default_os_type(),
             website_id: "Client".into(),

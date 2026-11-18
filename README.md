@@ -49,6 +49,7 @@ async fn main() -> steamwire::Result<()> {
 | `Utils.GetOSType`, `NetHelpers` | `util::os`, `util::net` | OS type from the running system, private IP obfuscation |
 | `WebAPI`, `WebAPI.AsyncInterface` | `webapi`, `WebApi::interface` | JSON, KeyValues (`vdf`) and protobuf (`protobuf_raw`) calls |
 | (SteamHelper-rs `steam-totp`) | `auth::guard` | Steam Guard codes, confirmation keys, device ID, `SharedSecretAuthenticator` |
+| (SteamHelper-rs CS2 share codes) | `types::ShareCode` | `CSGO-…` match share codes and download links |
 | NetHookAnalyzer2 | `steamwire-tools nethook` | a CLI tree view instead of the WinForms GUI |
 | ProtobufDumper | `steamwire-tools dump-protos` | custom options included; output recompiles with protoc |
 | NetHook2 | `steamwire-nethook` | Windows DLL, adapted from steamkit-rs (see below) |
@@ -262,12 +263,12 @@ break code that matches on them.
 ## Known differences
 
 - The machine ID: on macOS there is no MAC (as in SteamKit2), and the disk
-  ID comes from `diskutil info /` instead of DiskArbitration. Linux lists
-  adapters sorted by name, not in directory order. The Linux and macOS code
-  paths (machine ID and OS version) are only compile-checked; they haven't
-  been run.
-- The default logon `machine_name` and auth `device_friendly_name` are the
-  bare machine name; SteamKit2 appends " (SteamKit2)".
+  ID comes from `diskutil info /` instead of DiskArbitration (that needs
+  `unsafe` FFI, which the crate keeps to Windows). The Linux code path runs
+  in CI (`machine_info` on Ubuntu) but hasn't been compared with
+  SteamKit2's output; the macOS one is only compile-checked.
+- The default logon `machine_name` and auth `device_friendly_name` end in
+  " (steamwire)" where SteamKit2's end in " (SteamKit2)".
 - `Interface::call_protobuf` takes only the request, no extra arguments.
 - Verified against Steam: the anonymous and game server flows, CDN, Web API
   and NetHook (`live_checks`); with a real account QR and credentials
@@ -282,7 +283,7 @@ break code that matches on them.
   `send_chat_room_message`, kick/ban; replaced by Steam's newer chat),
   `share_file` (needs a Steam Cloud file), `SharedSecretAuthenticator`
   (needs an authenticator's shared secret; checked with node-steam-totp's
-  vectors) and the Linux and macOS code paths.
+  vectors) and the macOS code paths.
 - `add_screenshot` sends the request as SteamKit2 does, but Steam answers
   `Fail` unless the image was first uploaded to UFS, which SteamKit2 doesn't
   implement either. `add_friend_by_name` gets `Fail` from Steam today.
@@ -294,8 +295,11 @@ break code that matches on them.
   (`tracing` instead) and `DateUtils` (`std::time`).
 - Not in SteamKit2 but in `steamwire-community` (see below): trading,
   inventories, mobile confirmations, adding and removing the authenticator
-  and store purchases. Not ported from SteamHelper-rs: CS2 share codes
-  (game side) and its password web login (the CM auth sessions replace it).
+  and store purchases. Not ported from SteamHelper-rs: its CS2 game
+  coordinator client (inspect links, profiles, match info, the CS2
+  inventory; SteamKit2 has no per-game clients either, only the generic
+  `game_coordinator`) and its password web login (the CM auth sessions
+  replace it).
 
 ## References
 
@@ -313,7 +317,10 @@ break code that matches on them.
   (MIT, Copyright (c) 2020 Martin Mariano): `handlers/auth/guard.rs` is
   ported from its `steam-totp`, itself a port of
   [node-steam-totp](https://github.com/DoctorMcKay/node-steam-totp), and
-  keeps its test vectors. `steamwire-community`'s web session,
+  keeps its test vectors; `types/share_code.rs` is ported from its
+  `steam-client` (`gc/cs2/share_code.rs`), with akiver's
+  [csgo-sharecode](https://github.com/akiver/csgo-sharecode) test vectors.
+  `steamwire-community`'s web session,
   confirmations, trade offers, inventories and authenticator flow are
   ported from its `steam-mobile` and `steam-trading`.
 - Steam's own `checkout.js` (via
