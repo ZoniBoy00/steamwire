@@ -2142,6 +2142,25 @@ dependencies = [
 ]
 
 [[package]]
+name = "steamwire-community"
+version = "0.1.0"
+dependencies = [
+ "base64",
+ "futures-util",
+ "hex",
+ "prost",
+ "qrcode",
+ "rand",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "steamwire",
+ "thiserror",
+ "tokio",
+ "tracing",
+]
+
+[[package]]
 name = "steamwire-nethook"
 version = "0.1.0"
 dependencies = [

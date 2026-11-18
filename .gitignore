@@ -1,2 +1,6 @@
 /target
 **/*.rs.bk
+
+# Mobile authenticator secrets
+*.maFile
+*.maFile.partial
