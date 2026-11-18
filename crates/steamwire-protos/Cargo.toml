@@ -3,6 +3,7 @@ name = "steamwire-protos"
 description = "Steam protobuf messages generated with prost, for steamwire."
 keywords = ["steam", "steamkit", "protobuf", "valve"]
 categories = ["api-bindings", "encoding"]
+readme = "README.md"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true

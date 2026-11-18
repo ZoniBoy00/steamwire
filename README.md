@@ -62,7 +62,8 @@ async fn main() -> steamwire::Result<()> {
 
 ```
 crates/
-  steamwire-protos/     prost types and descriptor sets from proto/ (vendored protoc)
+  steamwire-protos/     prost types and descriptor sets from proto/ (vendored protoc); the games'
+                        GC messages and the web UI services behind features
   steamwire/
     steamd/             SteamKit2 SteamLanguage files, compiled by build.rs
     src/
@@ -109,6 +110,8 @@ cargo run -p steamwire --example account_changes -- --refriend   # also remove a
 cargo run -p steamwire --example service_call              # unified messages + heartbeat soak
 cargo run -p steamwire --example qr_login                  # log on to your account with the mobile app
 cargo run -p steamwire --example webapi                    # Web API as JSON, KeyValues and protobuf
+cargo run -p steamwire-community --example community_checks   # read-only web checks on your account
+cargo run -p steamwire-cs2 --example cs2_checks            # read-only CS2 game coordinator checks
 ```
 
 Set `RUST_LOG=steamwire=trace` to see every message sent and received.
@@ -254,7 +257,13 @@ read-only live checks (the account shows as in CS2 while it runs).
   `steamwire = { version = "0.1", default-features = false, features = ["rustls"] }`.
 
 Without either, TCP and UDP connections still work, but WebSocket and HTTPS
-don't.
+don't. `steamwire-community` and `steamwire-cs2` have the same two
+features and pass them on.
+
+`steamwire-protos` has one feature per proto set that SteamKit2 also
+generates, all off by default: `csgo`, `dota2`, `tf2`, `deadlock` (each
+game's coordinator messages) and `webui` (the web UI services, with typed
+clients). `steamwire-cs2` turns on `csgo`.
 
 ## Building and testing
 
@@ -283,7 +292,8 @@ decoder and encoder run in debug builds too, but for large depots build with
 
 ## Versioning
 
-Semantic versioning, with [CHANGELOG.md](CHANGELOG.md). Before 1.0 a minor
+Semantic versioning, with [CHANGELOG.md](CHANGELOG.md); what's left to do
+is in [ROADMAP.md](ROADMAP.md). Before 1.0 a minor
 release may change the API. Types that Steam may extend (callbacks, events,
 results, `Error`) are `#[non_exhaustive]`, so new fields and variants don't
 break code that matches on them.

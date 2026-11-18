@@ -135,6 +135,12 @@ was called steamkit, but that name is taken there); `steamwire-tools` and `steam
 checks them before the dependencies are on crates.io; publish in that order. Nothing has been
 published yet: publishing is permanent, so only on the user's say-so.
 
+## Roadmap
+
+`ROADMAP.md` lists what's open: live checks not yet run, the first
+release, candidates. Move items out of it (into the README or CHANGELOG)
+as they're done.
+
 ## Licensing
 
 LGPL-2.1-only. Code ported from other projects keeps its attribution in the
