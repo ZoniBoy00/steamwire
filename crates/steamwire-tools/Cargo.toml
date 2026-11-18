@@ -1,0 +1,24 @@
+[package]
+name = "steamwire-tools"
+description = "Developer tools for steamwire: a NetHook dump analyzer and a protobuf descriptor dumper (SteamKit2's NetHookAnalyzer2 and ProtobufDumper)."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+
+[[bin]]
+name = "steamwire-tools"
+path = "src/main.rs"
+
+[dependencies]
+steamwire = { path = "../steamwire", version = "0.1.0" }
+steamwire-protos = { path = "../steamwire-protos", version = "0.1.0" }
+prost.workspace = true
+prost-reflect = { version = "0.16", features = ["text-format"] }
+prost-types = "0.14"
+bytes = "1"
+
+[dev-dependencies]
+protoc-bin-vendored = "3"

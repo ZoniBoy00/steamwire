@@ -1601,18 +1601,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6ce2be8dc25455e1f91df71bfa12ad37d7af1092ae736f3a6cd0e37bc7810596"
 
 [[package]]
-name = "steamkit-nethook"
-version = "0.1.0"
-dependencies = [
- "chrono",
- "flate2",
- "prost",
- "steamkit2-protos",
- "windows",
-]
-
-[[package]]
-name = "steamkit2"
+name = "steamwire"
 version = "0.1.0"
 dependencies = [
  "aes",
@@ -1634,7 +1623,7 @@ dependencies = [
  "serde",
  "serde_json",
  "sha1",
- "steamkit2-protos",
+ "steamwire-protos",
  "thiserror",
  "tokio",
  "tokio-tungstenite",
@@ -1644,7 +1633,18 @@ dependencies = [
 ]
 
 [[package]]
-name = "steamkit2-protos"
+name = "steamwire-nethook"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "flate2",
+ "prost",
+ "steamwire-protos",
+ "windows",
+]
+
+[[package]]
+name = "steamwire-protos"
 version = "0.1.0"
 dependencies = [
  "prost",
@@ -1653,7 +1653,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "steamkit2-tools"
+name = "steamwire-tools"
 version = "0.1.0"
 dependencies = [
  "bytes",
@@ -1661,8 +1661,8 @@ dependencies = [
  "prost-reflect",
  "prost-types",
  "protoc-bin-vendored",
- "steamkit2",
- "steamkit2-protos",
+ "steamwire",
+ "steamwire-protos",
 ]
 
 [[package]]
