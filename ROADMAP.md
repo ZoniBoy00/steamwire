@@ -4,6 +4,31 @@ What's left to do, roughly in order. The [README](README.md) has what's
 done, and [CHANGELOG.md](CHANGELOG.md) has what changed. Nothing here is a
 promise of an API; items move as they're done or dropped.
 
+## Next: what to test
+
+State on 2026-11-18: everything is pushed and CI is green (`bd7dd47`). The
+checks below need the maintainer's own account, so they're run by hand,
+one at a time.
+
+1. **`cargo run -p steamwire-community --example community_checks`**
+   (QR login). Read-only. Expect `ok` on every line and `0 failures`. With
+   `-- --mafile <path>` it also lists the pending confirmations.
+2. **`cargo run -p steamwire-cs2 --example cs2_checks`** (QR login).
+   Read-only, but the account shows as playing CS2 until it logs off.
+   Close CS2 first: the game coordinator keeps one session per account.
+   The account needs the CS2 license.
+   - Expect `ok` for the game coordinator, inventory, matchmaking stats and
+     recent matches.
+   - `live matches` may time out: the game coordinator doesn't always answer
+     it.
+   - Optional: `-- --inspect <link> --profile <friend's steam64> --match
+     <CSGO-…>`.
+3. Note any `FAIL` lines here or as an issue. Then move what passed to the
+   README's "Verified against Steam" list and out of this file.
+
+Not to run without an explicit decision for that run: trading, accepting
+confirmations, purchases, and adding or removing the authenticator.
+
 ## Before the first release (0.1.0)
 
 - **Live checks still open.** These have been tested offline only:
