@@ -1,0 +1,17 @@
+[package]
+name = "steamkit2-protos"
+description = "Steam protobuf messages generated with prost, for steamkit2."
+keywords = ["steam", "steamkit", "protobuf", "valve"]
+categories = ["api-bindings", "encoding"]
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+prost.workspace = true
+
+[build-dependencies]
+prost-build = "0.14"
+protoc-bin-vendored = "3"

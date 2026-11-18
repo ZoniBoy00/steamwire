@@ -1,0 +1,24 @@
+[package]
+name = "steamkit2-tools"
+description = "Developer tools for steamkit2: a NetHook dump analyzer and a protobuf descriptor dumper (SteamKit2's NetHookAnalyzer2 and ProtobufDumper)."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+
+[[bin]]
+name = "steamkit2-tools"
+path = "src/main.rs"
+
+[dependencies]
+steamkit2 = { path = "../steamkit2", version = "0.1.0" }
+steamkit2-protos = { path = "../steamkit2-protos", version = "0.1.0" }
+prost.workspace = true
+prost-reflect = { version = "0.16", features = ["text-format"] }
+prost-types = "0.14"
+bytes = "1"
+
+[dev-dependencies]
+protoc-bin-vendored = "3"

@@ -1,12 +1,13 @@
 [workspace]
 resolver = "2"
-members = ["crates/steamkit-protos", "crates/steamkit", "crates/steamkit-tools", "crates/steamkit-nethook"]
+members = ["crates/steamkit2-protos", "crates/steamkit2", "crates/steamkit2-tools", "crates/steamkit-nethook"]
 
 [workspace.package]
 version = "0.1.0"
 edition = "2021"
 rust-version = "1.89"
 license = "LGPL-2.1-only"
+repository = "https://github.com/ZoniBoy00/steamkit"
 
 [workspace.dependencies]
 prost = "0.14"
