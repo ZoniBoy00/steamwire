@@ -16,7 +16,7 @@ pub(crate) struct Loopback {
     pub events: Events,
     sent: mpsc::UnboundedReceiver<Outgoing>,
     // Kept so the reader task doesn't see the connection close.
-    _incoming: mpsc::UnboundedSender<Bytes>,
+    incoming: Option<mpsc::UnboundedSender<Bytes>>,
 }
 
 impl Loopback {
@@ -27,7 +27,7 @@ impl Loopback {
         let (incoming_tx, incoming) = mpsc::unbounded_channel();
         let conn = Connection { outgoing, incoming, local_ip: None };
         let (client, events) = SteamClient::start(conn, CmServer::tcp("127.0.0.1:27017"), &Config::default());
-        let mut loopback = Self { client, events, sent, _incoming: incoming_tx };
+        let mut loopback = Self { client, events, sent, incoming: Some(incoming_tx) };
         assert_eq!(loopback.try_sent().map(|p| p.emsg), Some(EMsg::ClientHello));
         loopback
     }
@@ -48,6 +48,11 @@ impl Loopback {
         response.header.client_sessionid = Some(1234);
         loopback.receive_proto(response);
         loopback
+    }
+
+    /// Closes the connection from the server's side.
+    pub fn close(&mut self) {
+        self.incoming = None;
     }
 
     /// Dispatches raw bytes as if they came from the server.

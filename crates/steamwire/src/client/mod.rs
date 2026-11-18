@@ -512,6 +512,7 @@ impl SteamClient {
         self.stop_heartbeat();
         self.inner.jobs.lock().unwrap().clear();
         self.inner.waiters.lock().unwrap().clear();
+        self.handler_state().gc_jobs.clear_routes();
         tracing::debug!(user_initiated, "disconnected");
         let _ = self.inner.events.send(Event::Disconnected { user_initiated });
     }
