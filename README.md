@@ -77,6 +77,8 @@ crates/
     benches/            criterion benchmarks of the codecs
     tests/              CDN fixtures (tests/data/cdn), PICS captures (tests/data/pics),
                         SteamKit2 VZip output (tests/data/vzip), parser robustness tests
+  steamwire-community/  web side: web session, trade offers, inventories, confirmations,
+                        authenticator add/remove, wallet purchases (example: community_checks)
   steamwire-tools/      NetHook analyzer and protobuf dumper (library + CLI)
   steamwire-nethook/    NetHook2 DLL (Windows only)
 fuzz/                   cargo-fuzz targets (not in the workspace)
@@ -184,6 +186,36 @@ while let Some(steamwire::Event::Message(packet)) = events.recv().await {
 }
 ```
 
+## Web side: steamwire-community
+
+Steam's websites (steamcommunity.com, the store, the checkout) and the
+`IEconService`/`IAccountCartService` Web APIs, which SteamKit2 doesn't
+cover, are in the separate `steamwire-community` crate:
+
+- `WebSession::from_client(&client, refresh_token)`: the `steamLoginSecure`
+  and `sessionid` cookies and the access token, renewed through the client
+  about an hour before the token expires.
+- `TradeOffers`: list (all pages), get, send, accept, decline and cancel
+  offers; `TradeLink`, the account's own trade link, trade hold durations
+  and the trade protection acknowledgement. `Inventories`: anyone's public
+  inventory, page by page, with item descriptions.
+- `Confirmations`: list, accept and cancel mobile confirmations with the
+  authenticator's `identity_secret` (from an `.maFile`).
+- `authenticator::{add, finalize, remove, status}`: the Steam Guard mobile
+  authenticator over the client connection (`TwoFactor.*`), saved as Steam
+  Desktop Authenticator's `.maFile`. Save it before finalizing: it holds the
+  revocation code.
+- `Store`: the account cart (add, remove, clear) and buying it with the
+  Steam Wallet only. `quote()` prices it without charging; `finalize(quote,
+  max_total_cents)` pays, never retries, and refuses (cancelling the
+  transaction) if the wallet can't pay all of it or the total is over the
+  limit. Free games need no checkout: `request_free_license`.
+
+All of it is tested offline against a local server. Trading, purchases and
+the authenticator change the account, so they haven't been run live;
+`cargo run -p steamwire-community --example community_checks` makes read-only
+live checks.
+
 ## Features
 
 - `native-tls` (default): TLS for WebSocket, the Web API and the CDN from
@@ -260,9 +292,10 @@ break code that matches on them.
   `FileServerListProvider`), `HttpClientPurpose` (one `reqwest::Client`,
   replaceable with `WebApi::with_http_client`), `DebugLog`/`ILogContext`
   (`tracing` instead) and `DateUtils` (`std::time`).
-- Not ported from SteamHelper-rs: trading, mobile confirmations (beyond the
-  confirmation key) and CS2 share codes. They're web or game side, not
-  SteamKit2.
+- Not in SteamKit2 but in `steamwire-community` (see below): trading,
+  inventories, mobile confirmations, adding and removing the authenticator
+  and store purchases. Not ported from SteamHelper-rs: CS2 share codes
+  (game side) and its password web login (the CM auth sessions replace it).
 
 ## References
 
@@ -277,9 +310,18 @@ break code that matches on them.
 - [ezloot/steamkit](https://github.com/ezloot/steamkit): reviewed as a
   reference.
 - [saskenuba/SteamHelper-rs](https://github.com/saskenuba/SteamHelper-rs)
-  (MIT): `handlers/auth/guard.rs` is ported from its `steam-totp`, itself a
-  port of [node-steam-totp](https://github.com/DoctorMcKay/node-steam-totp),
-  and keeps its test vectors.
+  (MIT, Copyright (c) 2020 Martin Mariano): `handlers/auth/guard.rs` is
+  ported from its `steam-totp`, itself a port of
+  [node-steam-totp](https://github.com/DoctorMcKay/node-steam-totp), and
+  keeps its test vectors. `steamwire-community`'s web session,
+  confirmations, trade offers, inventories and authenticator flow are
+  ported from its `steam-mobile` and `steam-trading`.
+- Steam's own `checkout.js` (via
+  [SteamTracking](https://github.com/SteamTracking/SteamTracking)): the
+  checkout requests of `steamwire-community`'s `Store`;
+  [node-steam-user](https://github.com/DoctorMcKay/node-steam-user) and
+  [steamguard-cli](https://github.com/dyc3/steamguard-cli) for protocol facts
+  of the authenticator flow (no code taken).
 - [SteamKit ports](https://github.com/SteamRE/SteamKit/wiki/Ports):
   node-steam-user, go-steam, ValvePython/steam and others.
 

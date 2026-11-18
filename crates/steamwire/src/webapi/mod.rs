@@ -47,7 +47,7 @@ impl WebApi {
     pub fn new() -> Self {
         Self {
             http: reqwest::Client::builder()
-                .user_agent(concat!("steamkit-rs/", env!("CARGO_PKG_VERSION")))
+                .user_agent(concat!("steamwire/", env!("CARGO_PKG_VERSION")))
                 .build()
                 .expect("default reqwest client"),
             base_url: DEFAULT_BASE_URL.to_string(),

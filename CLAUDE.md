@@ -14,7 +14,7 @@ cargo test --workspace                          # all tests (no network needed)
 cargo test -p steamwire --lib auth               # tests whose path matches "auth"
 cargo test -p steamwire --test cdn vzip_delta    # one test in an integration test file
 cargo clippy --workspace --all-targets          # expected to be warning-free
-cargo fmt -p steamwire-protos -p steamwire -p steamwire-tools   # not --all: steamwire-nethook is vendored
+cargo fmt -p steamwire-protos -p steamwire -p steamwire-community -p steamwire-tools   # not --all: steamwire-nethook is vendored
 cargo run -p steamwire --example anonymous [-- tcp|udp]   # live logon + PICS
 cargo run -p steamwire --example cdn_download    # live CDN download with SHA-1 checks
 cargo run -p steamwire --example webapi          # live Web API (JSON, KeyValues, protobuf)
@@ -23,6 +23,7 @@ cargo bench -p steamwire --bench codecs         # criterion benchmarks
 cargo build -p steamwire --no-default-features --features rustls   # the rustls TLS backend
 cargo run -p steamwire --example live_checks     # live anonymous/game-server checks, prints ok/steam/anon/FAIL
 cargo run -p steamwire --example account_checks  # needs the user's account (QR); read-only unless --write
+cargo run -p steamwire-community --example community_checks  # user's account (QR); read-only web checks
 cargo run -p steamwire --example account_changes # two of the user's accounts; changes them (see its docs; --refriend re-adds the friend)
 cargo run -p steamwire-tools -- nethook <dump-dir> [--seq N] [--emsg NAME]
 cargo run -p steamwire-tools -- dump-protos <binary>... -o <dir>
@@ -40,6 +41,16 @@ contain the user's public IP: never commit them or use them as fixtures.
   (`protos::steam`, `protos::gc`). Also exports the descriptor sets
   (`STEAM_DESCRIPTOR_SET`, `GC_DESCRIPTOR_SET`) used for reflection.
 - `steamwire`: the library.
+- `steamwire-community`: the web side, not in SteamKit2: `WebSession`
+  (cookies from a CM access token, renewed through the client), trade
+  offers, inventories, mobile confirmations, adding/removing the
+  authenticator (`TwoFactor.*` over the CM, `.maFile`) and wallet
+  purchases. Ported in part from SteamHelper-rs (MIT); the checkout follows
+  Steam's `checkout.js`. Tested offline against a local HTTP server
+  (`tests/common`) and a fake `ServiceTransport`. Never run the
+  authenticator, trade or purchase calls on the user's accounts without
+  their explicit OK for that run: they move items or money, or can lock the
+  account. Don't print tokens, cookies or maFile secrets.
 - `steamwire-tools`: the NetHook analyzer (dynamic decoding via prost-reflect
   over the descriptor sets) and the ProtobufDumper (library + CLI).
 - `steamwire-nethook`: Windows-only NetHook2 DLL adapted from
@@ -110,10 +121,10 @@ credentials login, Steam Guard and cloud.
 
 ## Publishing
 
-The crates are `steamwire-protos` and `steamwire` on crates.io (the project
+The crates are `steamwire-protos`, `steamwire` and `steamwire-community` on crates.io (the project
 was called steamkit, but that name is taken there); `steamwire-tools` and `steamwire-nethook` are `publish = false`.
-`cargo package -p steamwire-protos -p steamwire` checks both before the
-protos are on crates.io; publish the protos first. Nothing has been
+`cargo package -p steamwire-protos -p steamwire -p steamwire-community`
+checks them before the dependencies are on crates.io; publish in that order. Nothing has been
 published yet: publishing is permanent, so only on the user's say-so.
 
 ## Licensing

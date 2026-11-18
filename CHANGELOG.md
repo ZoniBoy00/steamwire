@@ -23,6 +23,11 @@ version.
   `depot_download` (whole depots with parallel chunks and in-place
   updates), `machine_info`, and live checks for anonymous, account and
   two-account use.
+- `steamwire-community`: web sessions from a CM access token (renewed
+  through the client), trade offers, trade links and holds, inventories,
+  mobile confirmations, adding and removing the mobile authenticator
+  (`.maFile`), and the account cart with wallet-only purchases. Example
+  `community_checks` (read-only live checks).
 - Offline handler tests on a loopback client, parser robustness tests,
   cargo-fuzz targets (`fuzz/`) and criterion benchmarks.
 

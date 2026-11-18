@@ -55,8 +55,8 @@ impl Default for AuthSessionDetails {
         Self {
             device_friendly_name: std::env::var("COMPUTERNAME")
                 .or_else(|_| std::env::var("HOSTNAME"))
-                .map(|h| format!("{h} (steamkit-rs)"))
-                .unwrap_or_else(|_| "steamkit-rs".into()),
+                .map(|h| format!("{h} (steamwire)"))
+                .unwrap_or_else(|_| "steamwire".into()),
             platform_type: EAuthTokenPlatformType::KEAuthTokenPlatformTypeSteamClient,
             os_type: default_os_type(),
             website_id: "Client".into(),
