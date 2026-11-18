@@ -28,10 +28,30 @@ macro_rules! game_set {
     };
 }
 
-game_set!("csgo", csgo, CSGO_DESCRIPTOR_SET, "Counter-Strike 2's game coordinator messages (app 730; SteamKit2's `SteamKit2.GC.CSGO.Internal`).");
-game_set!("dota2", dota2, DOTA2_DESCRIPTOR_SET, "Dota 2's game coordinator messages (app 570; SteamKit2's `SteamKit2.GC.Dota.Internal`).");
-game_set!("tf2", tf2, TF2_DESCRIPTOR_SET, "Team Fortress 2's game coordinator messages (app 440; SteamKit2's `SteamKit2.GC.TF2.Internal`).");
-game_set!("deadlock", deadlock, DEADLOCK_DESCRIPTOR_SET, "Deadlock's game coordinator messages (app 1422450; SteamKit2's `SteamKit2.GC.Deadlock.Internal`).");
+game_set!(
+    "csgo",
+    csgo,
+    CSGO_DESCRIPTOR_SET,
+    "Counter-Strike 2's game coordinator messages (app 730; SteamKit2's `SteamKit2.GC.CSGO.Internal`)."
+);
+game_set!(
+    "dota2",
+    dota2,
+    DOTA2_DESCRIPTOR_SET,
+    "Dota 2's game coordinator messages (app 570; SteamKit2's `SteamKit2.GC.Dota.Internal`)."
+);
+game_set!(
+    "tf2",
+    tf2,
+    TF2_DESCRIPTOR_SET,
+    "Team Fortress 2's game coordinator messages (app 440; SteamKit2's `SteamKit2.GC.TF2.Internal`)."
+);
+game_set!(
+    "deadlock",
+    deadlock,
+    DEADLOCK_DESCRIPTOR_SET,
+    "Deadlock's game coordinator messages (app 1422450; SteamKit2's `SteamKit2.GC.Deadlock.Internal`)."
+);
 game_set!("webui", webui, WEBUI_DESCRIPTOR_SET, "The web UI's service messages and typed service clients (`webui::services`; SteamKit2's `SteamKit2.WebUI.Internal`).");
 
 /// The encoded `FileDescriptorSet` of [`steam`], for reflection (decoding
