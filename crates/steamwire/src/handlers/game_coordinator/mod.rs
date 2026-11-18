@@ -26,6 +26,11 @@ pub struct GcMessage {
 }
 
 impl GcMessage {
+    /// A message from `app_id`'s GC, such as a test's stand-in for one.
+    pub fn new(app_id: u32, packet: GcPacket) -> Self {
+        Self { app_id, packet }
+    }
+
     /// Decodes a `ClientFromGC` packet.
     pub fn from_packet(packet: &Packet) -> Option<Self> {
         if packet.emsg != EMsg::ClientFromGC {

@@ -2161,6 +2161,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "steamwire-cs2"
+version = "0.1.0"
+dependencies = [
+ "bytes",
+ "crc32fast",
+ "prost",
+ "qrcode",
+ "steamwire",
+ "steamwire-protos",
+ "thiserror",
+ "tokio",
+ "tracing",
+]
+
+[[package]]
 name = "steamwire-nethook"
 version = "0.1.0"
 dependencies = [

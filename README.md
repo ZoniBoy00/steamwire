@@ -55,6 +55,8 @@ async fn main() -> steamwire::Result<()> {
 | NetHook2 | `steamwire-nethook` | Windows DLL, adapted from steamkit-rs (see below) |
 | SteamLanguageParser | `crates/steamwire/build.rs` | generates the enums and `Msg*` structs at build time |
 | ProtobufGen | `steamwire-protos` (prost-build) | |
+| `SteamKit2.GC.{CSGO,Dota,TF2,Deadlock}.Internal`, `SteamKit2.WebUI.Internal` | `steamwire-protos` features `csgo`, `dota2`, `tf2`, `deadlock`, `webui` | `protos::csgo` etc., from SteamTracking/Protobufs at the commit SteamKit2 pins |
+| (SteamHelper-rs CS2 client) | `steamwire-cs2` | inspect links, item details, profiles, matches, the CS2 inventory; over `SteamClient::subscribe_gc` |
 
 ## Layout
 
@@ -80,6 +82,8 @@ crates/
                         SteamKit2 VZip output (tests/data/vzip), parser robustness tests
   steamwire-community/  web side: web session, trade offers, inventories, confirmations,
                         authenticator add/remove, wallet purchases (example: community_checks)
+  steamwire-cs2/        CS2's game coordinator: inspect links, item details, profiles, matches,
+                        the CS2 inventory (example: cs2_checks)
   steamwire-tools/      NetHook analyzer and protobuf dumper (library + CLI)
   steamwire-nethook/    NetHook2 DLL (Windows only)
 fuzz/                   cargo-fuzz targets (not in the workspace)
@@ -217,6 +221,30 @@ the authenticator change the account, so they haven't been run live;
 `cargo run -p steamwire-community --example community_checks` makes read-only
 live checks.
 
+## CS2: steamwire-cs2
+
+The CS2 game coordinator client, ported from SteamHelper-rs, is in the
+separate `steamwire-cs2` crate. `Cs2::connect(&client)` plays CS2 on the
+logged-on account and greets the game coordinator until it welcomes it;
+then, one request at a time with a cooldown (the game coordinator drops
+requests that come too fast):
+
+- `inspect` / `inspect_str`: an item's details from its inspect link
+  (def index, paint, pattern, float, stickers, keychains, StatTrak, name
+  tag), or offline when the link embeds the item.
+- `player_profile`, `request_matchmaking_stats`: ranks, wins, level,
+  commendations, cooldowns.
+- `match_info(&ShareCode)`, `recent_matches`, `live_matches`: rounds,
+  scores, players, demo links and share codes.
+- `inventory()`: the account's CS2 inventory, kept from the game
+  coordinator's shared-object cache, with storage units; `next_event`
+  tells what changed.
+
+It takes CS2's GC messages through `SteamClient::subscribe_gc(730)`, so the
+client's `Events` keep everything else. Tested offline against a fake game
+coordinator; `cargo run -p steamwire-cs2 --example cs2_checks` makes
+read-only live checks (the account shows as in CS2 while it runs).
+
 ## Features
 
 - `native-tls` (default): TLS for WebSocket, the Web API and the CDN from
@@ -293,13 +321,15 @@ break code that matches on them.
   `FileServerListProvider`), `HttpClientPurpose` (one `reqwest::Client`,
   replaceable with `WebApi::with_http_client`), `DebugLog`/`ILogContext`
   (`tracing` instead) and `DateUtils` (`std::time`).
-- Not in SteamKit2 but in `steamwire-community` (see below): trading,
+- Not in SteamKit2 but in `steamwire-community` (see above): trading,
   inventories, mobile confirmations, adding and removing the authenticator
-  and store purchases. Not ported from SteamHelper-rs: its CS2 game
-  coordinator client (inspect links, profiles, match info, the CS2
-  inventory; SteamKit2 has no per-game clients either, only the generic
-  `game_coordinator`) and its password web login (the CM auth sessions
-  replace it).
+  and store purchases; and in `steamwire-cs2`, CS2's game coordinator
+  client (SteamKit2 has only the generic game coordinator handler). Not
+  ported from SteamHelper-rs: its password web login (the CM auth sessions
+  replace it). `steamwire-cs2` doesn't reconnect: SteamHelper-rs's client
+  reconnects and greets again, but steamwire has no reconnecting client, so
+  a disconnect ends the session (`Error::Closed`), and its subscription
+  channel never drops messages (no `Lagged` from it).
 
 ## References
 
@@ -322,7 +352,13 @@ break code that matches on them.
   [csgo-sharecode](https://github.com/akiver/csgo-sharecode) test vectors.
   `steamwire-community`'s web session,
   confirmations, trade offers, inventories and authenticator flow are
-  ported from its `steam-mobile` and `steam-trading`.
+  ported from its `steam-mobile` and `steam-trading`; `steamwire-cs2` from
+  its `steam-client` (`gc/cs2`), which follows
+  [node-globaloffensive](https://github.com/DoctorMcKay/node-globaloffensive)
+  and [ValvePython/csgo](https://github.com/ValvePython/csgo).
+- [SteamTracking/Protobufs](https://github.com/SteamTracking/Protobufs) at
+  `89b77382`, the commit SteamKit2 pins: the game coordinator and web UI
+  `.proto` sets of `steamwire-protos`.
 - Steam's own `checkout.js` (via
   [SteamTracking](https://github.com/SteamTracking/SteamTracking)): the
   checkout requests of `steamwire-community`'s `Store`;

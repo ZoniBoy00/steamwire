@@ -14,7 +14,7 @@ cargo test --workspace                          # all tests (no network needed)
 cargo test -p steamwire --lib auth               # tests whose path matches "auth"
 cargo test -p steamwire --test cdn vzip_delta    # one test in an integration test file
 cargo clippy --workspace --all-targets          # expected to be warning-free
-cargo fmt -p steamwire-protos -p steamwire -p steamwire-community -p steamwire-tools   # not --all: steamwire-nethook is vendored
+cargo fmt -p steamwire-protos -p steamwire -p steamwire-community -p steamwire-cs2 -p steamwire-tools   # not --all: steamwire-nethook is vendored
 cargo run -p steamwire --example anonymous [-- tcp|udp]   # live logon + PICS
 cargo run -p steamwire --example cdn_download    # live CDN download with SHA-1 checks
 cargo run -p steamwire --example webapi          # live Web API (JSON, KeyValues, protobuf)
@@ -24,6 +24,7 @@ cargo build -p steamwire --no-default-features --features rustls   # the rustls 
 cargo run -p steamwire --example live_checks     # live anonymous/game-server checks, prints ok/steam/anon/FAIL
 cargo run -p steamwire --example account_checks  # needs the user's account (QR); read-only unless --write
 cargo run -p steamwire-community --example community_checks  # user's account (QR); read-only web checks
+cargo run -p steamwire-cs2 --example cs2_checks  # user's account (QR); read-only CS2 GC checks; shows the account in CS2
 cargo run -p steamwire --example account_changes # two of the user's accounts; changes them (see its docs; --refriend re-adds the friend)
 cargo run -p steamwire-tools -- nethook <dump-dir> [--seq N] [--emsg NAME]
 cargo run -p steamwire-tools -- dump-protos <binary>... -o <dir>
@@ -51,6 +52,13 @@ contain the user's public IP: never commit them or use them as fixtures.
   authenticator, trade or purchase calls on the user's accounts without
   their explicit OK for that run: they move items or money, or can lock the
   account. Don't print tokens, cookies or maFile secrets.
+- `steamwire-cs2`: CS2's game coordinator client, not in SteamKit2,
+  ported from SteamHelper-rs `steam-client` `gc/cs2` (MIT): inspect links
+  and item details, profiles, matches, the CS2 inventory. Built on
+  `SteamClient::subscribe_gc`; no reconnecting (a disconnect is
+  `Error::Closed`). Tested offline against a fake GC (`Link::Fake` in
+  `client.rs`). Connecting plays CS2 on the account: never run it live on
+  the user's account without their OK for that run.
 - `steamwire-tools`: the NetHook analyzer (dynamic decoding via prost-reflect
   over the descriptor sets) and the ProtobufDumper (library + CLI).
 - `steamwire-nethook`: Windows-only NetHook2 DLL adapted from
@@ -121,9 +129,9 @@ credentials login, Steam Guard and cloud.
 
 ## Publishing
 
-The crates are `steamwire-protos`, `steamwire` and `steamwire-community` on crates.io (the project
+The crates are `steamwire-protos`, `steamwire`, `steamwire-community` and `steamwire-cs2` on crates.io (the project
 was called steamkit, but that name is taken there); `steamwire-tools` and `steamwire-nethook` are `publish = false`.
-`cargo package -p steamwire-protos -p steamwire -p steamwire-community`
+`cargo package -p steamwire-protos -p steamwire -p steamwire-community -p steamwire-cs2`
 checks them before the dependencies are on crates.io; publish in that order. Nothing has been
 published yet: publishing is permanent, so only on the user's say-so.
 
