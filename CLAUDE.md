@@ -143,13 +143,13 @@ on crates.io yet is published (with the `CARGO_REGISTRY_TOKEN` secret), then `vX
 with a GitHub release. So bumping the version and pushing to main releases: bump
 `[workspace.package] version` and steamwire-tools' `version = "..."` of steamwire together (the
 workflow fails otherwise), and only on the user's say-so, since publishing is permanent. Never
-handle the crates.io token. The Release workflow is disabled on GitHub until the user says to
-enable it (`gh workflow enable Release`).
+handle the crates.io token. 0.1.0 was published on 2026-11-20; the Release workflow is enabled,
+so any version bump that reaches main is published.
 
 ## Roadmap
 
-`ROADMAP.md` lists what's open: live checks not yet run, the first
-release, candidates. Move items out of it (into the README or CHANGELOG)
+`ROADMAP.md` lists what's open: live checks not yet run, what's verified
+only in part, candidates. Move items out of it (into the README or CHANGELOG)
 as they're done.
 
 ## Licensing

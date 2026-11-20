@@ -1,5 +1,9 @@
 # steamwire
 
+[![crates.io](https://img.shields.io/crates/v/steamwire.svg)](https://crates.io/crates/steamwire)
+[![docs.rs](https://img.shields.io/docsrs/steamwire)](https://docs.rs/steamwire)
+[![CI](https://github.com/ZoniBoy00/steamwire/actions/workflows/ci.yml/badge.svg)](https://github.com/ZoniBoy00/steamwire/actions/workflows/ci.yml)
+
 An async Rust library for talking to the Steam network, ported from
 [SteamKit2](https://github.com/SteamRE/SteamKit) (.NET), with its tools.
 

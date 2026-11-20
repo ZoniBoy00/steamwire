@@ -7,6 +7,8 @@ All notable changes to the steamwire crates. The format follows
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-11-20
+
 ### Added
 
 - SteamKit2 3.x's features (the README lists the differences): the CM

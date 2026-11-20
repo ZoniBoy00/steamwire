@@ -19,15 +19,6 @@ live, all read-only and optional:
 Not to run without an explicit decision for that run: trading, accepting
 confirmations, purchases, and adding or removing the authenticator.
 
-## Before the first release (0.1.0)
-
-- **Publish** `steamwire` to crates.io, now that the live checks pass (the
-  web side and CS2 are its `community` and `cs2` features).
-  `cargo package` already passes. Publishing is permanent, so
-  it happens only on the maintainer's say-so: the release workflow
-  publishes on the first green CI run on main once it's enabled again
-  (`gh workflow enable Release`; the `CARGO_REGISTRY_TOKEN` secret is set).
-
 ## Verified only in part
 
 - The machine ID on Linux runs in CI but hasn't been compared with
