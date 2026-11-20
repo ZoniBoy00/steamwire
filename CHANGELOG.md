@@ -47,6 +47,15 @@ version.
 
 ### Fixed
 
+- `steamwire-community`: GETs follow redirects within Steam's websites
+  with the session's cookies, so the trade link of an account with a
+  custom profile URL is found (found live); other redirects are
+  `Error::Redirected` with their target, and `is_logged_in` is true only
+  when the account page itself answers.
+- `steamwire-cs2`: `request_matchmaking_stats` asks for the account's own
+  profile, since CS2's game coordinator no longer answers
+  `MatchmakingClient2GCHello` (found live).
+
 - `CredentialsAuthSession::submit_code` treats `DuplicateRequest` as
   success, as SteamKit2 does (found live).
 - A `ClientPersonaState` about the logged-on user updates our own persona

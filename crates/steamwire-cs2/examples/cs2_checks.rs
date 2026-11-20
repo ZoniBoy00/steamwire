@@ -6,16 +6,22 @@
 //! Optionally inspects an item (`--inspect <link>`), reads a friend's profile (`--profile <steam64>`) and a match
 //! (`--match <share code>`). Prints counts and item numbers only: no tokens.
 //!
+//! With `NETHOOK=1`, every message is dumped to `nethook/<time>/` next to the executable (read it with
+//! `steamwire-tools nethook`). The dumps hold your public IP: don't share or commit them.
+//!
 //! ```sh
 //! cargo run -p steamwire-cs2 --example cs2_checks [-- --inspect <link>] [--profile <steam64>] [--match <code>]
 //! ```
 
 use qrcode::render::unicode;
 use qrcode::QrCode;
+use std::collections::BTreeMap;
+use std::sync::Arc;
 use steamwire::handlers::auth::AuthSessionDetails;
 use steamwire::handlers::user::LogOnDetails;
-use steamwire::{Config, SteamClient, SteamId};
-use steamwire_cs2::{Cs2, ShareCode};
+
+use steamwire::{Config, NetHookListener, SteamClient, SteamId};
+use steamwire_cs2::{Cs2, Cs2Event, ShareCode};
 
 fn print_qr(url: &str) {
     match QrCode::new(url) {
@@ -49,7 +55,15 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let profile = profile.map(|id| id.parse().map(SteamId::from_u64)).transpose()?;
     let share_code = share_code.map(|code| code.parse::<ShareCode>()).transpose()?;
 
-    let (client, _events) = SteamClient::connect(Config::default()).await?;
+    let network_listener = match std::env::var_os("NETHOOK") {
+        Some(_) => {
+            let listener = NetHookListener::new()?;
+            println!("dumping messages to {}", listener.directory().display());
+            Some(Arc::new(listener) as _)
+        }
+        None => None,
+    };
+    let (client, _events) = SteamClient::connect(Config { network_listener, ..Config::default() }).await?;
     let mut qr = client.begin_auth_session_via_qr(&AuthSessionDetails::default()).await?;
     print_qr(qr.challenge_url());
     println!("Scan it with the Steam mobile app.");
@@ -81,11 +95,22 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             None => "not sent (yet)".to_string(),
         },
     ));
+    // the game coordinator sends them after its welcome; `inventory` read what came so far
+    match cs2.matchmaking_stats() {
+        Some(stats) => {
+            println!("info  stats with the welcome: level {:?}, {} ranks", stats.level(), stats.ranks().count())
+        }
+        None => println!("info  stats with the welcome: none (yet)"),
+    }
     check(report("matchmaking stats", cs2.request_matchmaking_stats().await, |stats| {
         format!("level {:?}, {} ranks", stats.level(), stats.ranks().count())
     }));
     check(report("recent matches", cs2.recent_matches(me).await, |list| format!("{} matches", list.matches().len())));
-    check(report("live matches", cs2.live_matches().await, |list| format!("{} matches", list.matches().len())));
+    // not counted: the game coordinator doesn't always answer it
+    match cs2.live_matches().await {
+        Ok(list) => println!("ok    live matches: {} matches", list.matches().len()),
+        Err(e) => println!("note  live matches: {e} (not counted)"),
+    }
     if let Some(link) = inspect {
         check(report("inspect", cs2.inspect_str(&link).await, |item| {
             format!(
@@ -108,6 +133,19 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             None => "not found".to_string(),
         }));
     }
+
+    // what else the game coordinator sent, by kind and message type
+    let mut seen = BTreeMap::<String, usize>::new();
+    while let Ok(Some(event)) = cs2.try_next_event() {
+        let kind = match &event {
+            Cs2Event::Other(message) => format!("message {}", message.msg_type()),
+            Cs2Event::MatchmakingStats(_) => "matchmaking stats".to_string(),
+            Cs2Event::ItemAcquired(_) | Cs2Event::ItemChanged { .. } | Cs2Event::ItemRemoved(_) => "item".to_string(),
+            other => format!("{other:?}").split([' ', '(', '{']).next().unwrap_or_default().to_string(),
+        };
+        *seen.entry(kind).or_default() += 1;
+    }
+    println!("info  other events: {seen:?}");
 
     drop(cs2);
     client.log_off()?;

@@ -13,6 +13,16 @@ pub enum Error {
     /// Steam answered with an HTTP error status.
     #[error("HTTP status {0}")]
     HttpStatus(u16),
+    /// Steam redirected somewhere the session doesn't follow: another
+    /// method than GET, a host other than Steam's websites, or too many
+    /// hops. `location` is the target without its query.
+    #[error("HTTP status {status}: redirected to {location}")]
+    Redirected {
+        /// The redirect's status.
+        status: u16,
+        /// Where it pointed: scheme, host and path.
+        location: String,
+    },
     /// Steam redirected to its login page or rejected the session's cookies:
     /// the access token was revoked or has expired.
     #[error("the web session is no longer logged in")]

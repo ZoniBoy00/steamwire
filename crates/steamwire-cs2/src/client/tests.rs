@@ -616,10 +616,11 @@ async fn keeps_the_inventory_and_the_stats_the_game_coordinator_sends() {
 async fn asks_for_the_matchmaking_stats_again() {
     let (mut cs2, mut gc) = session().await;
     let answers = async {
+        // as the account's own profile: the game coordinator doesn't answer `MatchmakingClient2GCHello` any more
         let (request, _) =
-            gc.read_request::<CMsgGccStrike15V2MatchmakingClient2GcHello>(MATCHMAKING_CLIENT_HELLO).await;
-        assert_eq!(request.encoded_len(), 0);
-        gc.send(MATCHMAKING_HELLO, &stats(PLAYER_ACCOUNT, 30));
+            gc.read_request::<CMsgGccStrike15V2ClientRequestPlayersProfile>(REQUEST_PLAYERS_PROFILE).await;
+        assert_eq!(request.account_id(), PLAYER_ACCOUNT);
+        gc.send(PLAYERS_PROFILE, &profiles(vec![stats(PLAYER_ACCOUNT, 30)]));
     };
     let (stats, ()) = tokio::join!(soon(cs2.request_matchmaking_stats()), answers);
     assert_eq!(stats.unwrap().level(), Some(30));

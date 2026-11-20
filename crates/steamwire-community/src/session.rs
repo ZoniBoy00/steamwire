@@ -27,6 +27,9 @@ const RENEW_BEFORE: Duration = Duration::from_secs(60 * 60);
 const RETRY_AFTER_FAILURE: Duration = Duration::from_secs(30);
 /// The least time between two renewals of a short-lived token.
 const MIN_RENEWAL_INTERVAL: Duration = Duration::from_secs(30);
+/// How many redirects a GET follows, such as from `/profiles/<id>/` to the
+/// profile's custom URL.
+const MAX_REDIRECTS: usize = 5;
 
 /// Where the session sends its requests. The defaults are Steam's; tests
 /// point them at a local server.
@@ -215,7 +218,8 @@ impl WebSessionBuilder {
     fn build(self, issuer: Option<Arc<dyn TokenIssuer>>, token: Token) -> Result<WebSession> {
         let http = reqwest::Client::builder()
             .user_agent(concat!("steamwire-community/", env!("CARGO_PKG_VERSION")))
-            // A redirect to the login page means the session has expired.
+            // Followed by hand: a redirect to the login page means the
+            // session has expired, and cookies only go to Steam's hosts.
             .redirect(reqwest::redirect::Policy::none())
             .timeout(self.timeout)
             .build()?;
@@ -286,10 +290,17 @@ impl WebSession {
 
     /// Whether Steam still takes the session's cookies: the store's account
     /// page answers without sending to the login page.
+    ///
+    /// Fails with [`Error::Redirected`] if the page sent elsewhere than the
+    /// login page.
     pub async fn is_logged_in(&self) -> Result<bool> {
         let url = format!("{}/account/", self.0.urls.store);
         match self.web(self.0.http.get(url)).await {
-            Ok(_) => Ok(true),
+            Ok(response) if !response.status().is_success() => Err(Error::HttpStatus(response.status().as_u16())),
+            Ok(response) if response.url().path().ends_with("/account/") => Ok(true),
+            Ok(response) => {
+                Err(Error::Redirected { status: response.status().as_u16(), location: without_query(response.url()) })
+            }
             Err(Error::SessionExpired) => Ok(false),
             Err(e) => Err(e),
         }
@@ -325,21 +336,51 @@ impl WebSession {
     }
 
     /// Sends a request to one of the websites, with the session's cookies.
+    /// A GET follows redirects within Steam's websites (such as to a
+    /// profile's custom URL), with the cookies; a redirect to the login page
+    /// is [`Error::SessionExpired`].
     async fn web(&self, request: RequestBuilder) -> Result<Response> {
         let token = self.access_token().await?;
-        let response = request.header(COOKIE, self.cookie_header(&token)).send().await?;
-        self.keep_cookies(&response);
-        if response.status().is_redirection() {
+        let mut request = request.header(COOKIE, self.cookie_header(&token)).build()?;
+        let mut hops = 0;
+        loop {
+            let is_get = request.method() == reqwest::Method::GET;
+            let response = self.0.http.execute(request).await?;
+            self.keep_cookies(&response);
+            let status = response.status();
+            if status == reqwest::StatusCode::UNAUTHORIZED {
+                return Err(Error::SessionExpired);
+            }
+            if !status.is_redirection() {
+                return Ok(response);
+            }
             let location = response.headers().get(LOCATION).and_then(|l| l.to_str().ok()).unwrap_or_default();
             if location.contains("/login") || location.contains("lostauth") {
                 return Err(Error::SessionExpired);
             }
-            return Err(Error::HttpStatus(response.status().as_u16()));
+            let target = response.url().join(location).ok();
+            match target {
+                Some(target) if is_get && hops < MAX_REDIRECTS && self.is_steam(&target) => {
+                    tracing::debug!("following a redirect to {}", without_query(&target));
+                    hops += 1;
+                    // the cookies again, with those the redirect set
+                    request = self.0.http.get(target).header(COOKIE, self.cookie_header(&token)).build()?;
+                }
+                target => {
+                    let location = target.as_ref().map_or_else(|| location.to_string(), without_query);
+                    return Err(Error::Redirected { status: status.as_u16(), location });
+                }
+            }
         }
-        if response.status() == reqwest::StatusCode::UNAUTHORIZED {
-            return Err(Error::SessionExpired);
-        }
-        Ok(response)
+    }
+
+    /// Whether `url` is on one of the websites the session sends cookies to.
+    fn is_steam(&self, url: &reqwest::Url) -> bool {
+        let urls = &self.0.urls;
+        [&urls.community, &urls.store, &urls.checkout]
+            .into_iter()
+            .filter_map(|base| reqwest::Url::parse(base).ok())
+            .any(|base| base.origin() == url.origin())
     }
 
     /// GETs `url` (one of the websites).
@@ -406,6 +447,15 @@ impl WebSession {
         }
         Resp::decode(response.bytes().await?).map_err(|e| Error::invalid(format!("{interface}.{method}: {e}")))
     }
+}
+
+/// `url`'s scheme, host and path: Steam's redirects can carry nonces in the
+/// query.
+fn without_query(url: &reqwest::Url) -> String {
+    let mut url = url.clone();
+    url.set_query(None);
+    url.set_fragment(None);
+    url.to_string()
 }
 
 /// Fails with the `x-eresult` header's result if it isn't OK.

@@ -222,7 +222,7 @@ cover, are in the separate `steamwire-community` crate:
 All of it is tested offline against a local server. Trading, purchases and
 the authenticator change the account, so they haven't been run live;
 `cargo run -p steamwire-community --example community_checks` makes read-only
-live checks.
+live checks; they pass (November 2026).
 
 ## CS2: steamwire-cs2
 
@@ -246,7 +246,9 @@ requests that come too fast):
 It takes CS2's GC messages through `SteamClient::subscribe_gc(730)`, so the
 client's `Events` keep everything else. Tested offline against a fake game
 coordinator; `cargo run -p steamwire-cs2 --example cs2_checks` makes
-read-only live checks (the account shows as in CS2 while it runs).
+read-only live checks (the account shows as in CS2 while it runs): the
+greeting, the inventory, the matchmaking stats and recent matches pass
+(November 2026).
 
 ## Features
 
@@ -316,7 +318,10 @@ break code that matches on them.
   requests, removal, blocking, chat messages, persona names, lobby invites,
   joins and owner changes, plus creating leaderboards, free licenses and
   the TF2 game coordinator (`account_changes`), the rustls feature, and
-  whole-depot downloads with updates (`depot_download`).
+  whole-depot downloads with updates (`depot_download`). On the web side
+  the session's cookies, trade offers, the trade link and holds, the Steam
+  inventory and the cart (`community_checks`); in CS2 the greeting, the
+  inventory, the matchmaking stats and recent matches (`cs2_checks`).
 - Tested only offline: the legacy chat rooms (`join_chat`,
   `send_chat_room_message`, kick/ban; replaced by Steam's newer chat),
   `share_file` (needs a Steam Cloud file), `SharedSecretAuthenticator`
@@ -324,7 +329,10 @@ break code that matches on them.
   vectors) and the macOS code paths.
 - `add_screenshot` sends the request as SteamKit2 does, but Steam answers
   `Fail` unless the image was first uploaded to UFS, which SteamKit2 doesn't
-  implement either. `add_friend_by_name` gets `Fail` from Steam today.
+  implement either. `add_friend_by_name` gets `Fail` from Steam today. CS2's game
+  coordinator answered neither `live_matches` (`MatchListRequestCurrentLiveGames`)
+  nor `MatchmakingClient2GCHello`, so `request_matchmaking_stats` asks for
+  the account's own profile instead (November 2026).
 - Not ported, by design: the `CallbackManager` (requests are `async fn`s
   and the rest arrives as events), C# operator overloads and implicit
   conversions, `IsolatedStorageServerListProvider` (.NET-only storage; use

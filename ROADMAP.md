@@ -6,41 +6,21 @@ promise of an API; items move as they're done or dropped.
 
 ## Next: what to test
 
-State on 2026-11-18: everything is pushed and CI is green (`bd7dd47`). The
-checks below need the maintainer's own account, so they're run by hand,
-one at a time.
+State on 2026-11-20: `community_checks` passes, and `cs2_checks` passes
+except `live matches`, which CS2's game coordinator didn't answer (not
+counted). Still not run live, all read-only and optional:
 
-1. **`cargo run -p steamwire-community --example community_checks`**
-   (QR login). Read-only. Expect `ok` on every line and `0 failures`. With
-   `-- --mafile <path>` it also lists the pending confirmations.
-2. **`cargo run -p steamwire-cs2 --example cs2_checks`** (QR login).
-   Read-only, but the account shows as playing CS2 until it logs off.
-   Close CS2 first: the game coordinator keeps one session per account.
-   The account needs the CS2 license.
-   - Expect `ok` for the game coordinator, inventory, matchmaking stats and
-     recent matches.
-   - `live matches` may time out: the game coordinator doesn't always answer
-     it.
-   - Optional: `-- --inspect <link> --profile <friend's steam64> --match
-     <CSGO-…>`.
-3. Note any `FAIL` lines here or as an issue. Then move what passed to the
-   README's "Verified against Steam" list and out of this file.
+- `community_checks -- --mafile <path>`: the pending confirmations.
+- `cs2_checks -- --inspect <link> --profile <friend's steam64> --match
+  <CSGO-…>`: inspecting, a friend's profile and a match by share code.
 
 Not to run without an explicit decision for that run: trading, accepting
 confirmations, purchases, and adding or removing the authenticator.
 
 ## Before the first release (0.1.0)
 
-- **Live checks still open.** These have been tested offline only:
-  - `steamwire-community`'s read-only checks (`community_checks`): the web
-    session, trade offers, the trade link and holds, the Steam inventory,
-    the cart and the mobile confirmation list. The first run was
-    interrupted.
-  - `steamwire-cs2` against the real game coordinator (`cs2_checks`):
-    greeting, the inventory, the matchmaking stats, recent and live matches,
-    and optionally inspecting, a friend's profile and a match by share code.
 - **Publish** `steamwire-protos`, `steamwire`, `steamwire-community` and
-  `steamwire-cs2` to crates.io, in that order, once the checks above pass.
+  `steamwire-cs2` to crates.io, in that order, now that the live checks pass.
   `cargo package` already passes for all four. Publishing is permanent, so
   it happens only on the maintainer's say-so.
 

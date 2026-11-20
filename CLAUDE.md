@@ -30,8 +30,8 @@ cargo run -p steamwire-tools -- nethook <dump-dir> [--seq N] [--emsg NAME]
 cargo run -p steamwire-tools -- dump-protos <binary>... -o <dir>
 ```
 
-`RUST_LOG=steamwire=trace` logs every message; `NETHOOK=1` on the examples
-dumps every message to `target/debug/examples/nethook/<time>/`. Those dumps
+`RUST_LOG=steamwire=trace` logs every message; `NETHOOK=1` on the `anonymous`
+and `cs2_checks` examples dumps every message to `target/debug/examples/nethook/<time>/`. Those dumps
 contain the user's public IP: never commit them or use them as fixtures.
 `protoc` is vendored, so no system install is needed. Rust 1.89+.
 

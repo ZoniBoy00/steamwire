@@ -44,6 +44,66 @@ async fn session_cookies_and_expiry() {
     assert!(!expired.is_logged_in().await.unwrap());
 }
 
+#[tokio::test]
+async fn redirects_within_steam_are_followed() {
+    let server = Server::start(|request| match request.path.as_str() {
+        // a profile with a custom URL
+        "/profiles/76561198000000001/tradeoffers/privacy" => {
+            Answer::redirect("/id/someone/tradeoffers/privacy").header("Set-Cookie", "hop=1; path=/")
+        }
+        "/id/someone/tradeoffers/privacy" if request.cookie("steamLoginSecure").is_some() => Answer::status(
+            200,
+            r#"<input value="https://steamcommunity.com/tradeoffer/new/?partner=39734273&amp;token=Ab12Cd34">"#,
+        ),
+        // the account page sends elsewhere than the login page
+        "/account/" => Answer::redirect("/somewhere/?nonce=secret"),
+        "/somewhere/" => Answer::status(200, ""),
+        "/away/account/" => Answer::redirect("https://example.com/elsewhere?nonce=secret"),
+        "/loop/account/" => Answer::redirect("/loop/account/"),
+        _ => Answer::status(404, ""),
+    })
+    .await;
+    let session = server.session();
+
+    let link = TradeOffers::new(session.clone()).my_trade_link().await.unwrap();
+    assert_eq!(link.partner, ME);
+    let hop = server.last();
+    assert_eq!(hop.path, "/id/someone/tradeoffers/privacy");
+    assert_eq!(hop.cookie("hop").as_deref(), Some("1"));
+    assert!(hop.cookie("sessionid").is_some());
+
+    // not taken for the account page, and the query isn't shown
+    match session.is_logged_in().await {
+        Err(Error::Redirected { location, .. }) => assert_eq!(location, format!("{}/somewhere/", server.url)),
+        other => panic!("{other:?}"),
+    }
+
+    // another host isn't followed (nor sent the cookies)
+    let away = WebSession::builder(ME).urls(Urls::all(&format!("{}/away", server.url))).access_token("x").unwrap();
+    let before = server.requests().len();
+    match away.is_logged_in().await {
+        Err(Error::Redirected { status: 302, location }) => assert_eq!(location, "https://example.com/elsewhere"),
+        other => panic!("{other:?}"),
+    }
+    assert_eq!(server.requests().len(), before + 1);
+
+    // nor endlessly
+    let looping = WebSession::builder(ME).urls(Urls::all(&format!("{}/loop", server.url))).access_token("x").unwrap();
+    assert!(matches!(looping.is_logged_in().await, Err(Error::Redirected { .. })));
+}
+
+#[tokio::test]
+async fn posts_dont_follow_redirects() {
+    let server = Server::start(|request| match request.path.as_str() {
+        "/trade/new/acknowledge" => Answer::redirect("/elsewhere"),
+        _ => Answer::status(200, ""),
+    })
+    .await;
+    let result = TradeOffers::new(server.session()).acknowledge_trade_protection().await;
+    assert!(matches!(result, Err(Error::Redirected { status: 302, .. })), "{result:?}");
+    assert_eq!(server.requests().len(), 1);
+}
+
 struct CountingIssuer(AtomicUsize);
 
 impl TokenIssuer for CountingIssuer {

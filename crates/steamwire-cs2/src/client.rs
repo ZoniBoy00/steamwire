@@ -23,8 +23,8 @@ use steamwire_protos::csgo::{
     CMsgGccStrike15V2ClientRequestPlayersProfile, CMsgGccStrike15V2MatchList,
     CMsgGccStrike15V2MatchListRequestCurrentLiveGames, CMsgGccStrike15V2MatchListRequestFullGameInfo,
     CMsgGccStrike15V2MatchListRequestLiveGameForUser, CMsgGccStrike15V2MatchListRequestRecentUserGames,
-    CMsgGccStrike15V2MatchmakingClient2GcHello, CMsgGccStrike15V2MatchmakingGc2ClientHello,
-    CMsgGccStrike15V2PlayersProfile, ECsgoGcMsg, EgcBaseClientMsg, GcConnectionStatus,
+    CMsgGccStrike15V2MatchmakingGc2ClientHello, CMsgGccStrike15V2PlayersProfile, ECsgoGcMsg, EgcBaseClientMsg,
+    GcConnectionStatus,
 };
 use tokio::sync::mpsc;
 use tokio::time::{sleep_until, Instant};
@@ -66,7 +66,6 @@ const CONNECTION_STATUS: u32 = EgcBaseClientMsg::KEMsgGcClientConnectionStatus a
 const LOGON_FATAL_ERROR: u32 = ECsgoGcMsg::KEMsgGccStrike15V2ClientLogonFatalError as u32;
 const PREVIEW_REQUEST: u32 = ECsgoGcMsg::KEMsgGccStrike15V2Client2GcEconPreviewDataBlockRequest as u32;
 const PREVIEW_RESPONSE: u32 = ECsgoGcMsg::KEMsgGccStrike15V2Client2GcEconPreviewDataBlockResponse as u32;
-const MATCHMAKING_CLIENT_HELLO: u32 = ECsgoGcMsg::KEMsgGccStrike15V2MatchmakingClient2GcHello as u32;
 const MATCHMAKING_HELLO: u32 = ECsgoGcMsg::KEMsgGccStrike15V2MatchmakingGc2ClientHello as u32;
 const REQUEST_PLAYERS_PROFILE: u32 = ECsgoGcMsg::KEMsgGccStrike15V2ClientRequestPlayersProfile as u32;
 const PLAYERS_PROFILE: u32 = ECsgoGcMsg::KEMsgGccStrike15V2PlayersProfile as u32;
@@ -345,18 +344,16 @@ impl Cs2 {
         .await
     }
 
-    /// Asks the game coordinator for the account's matchmaking stats again (`MatchmakingClient2GCHello`, 9109), and
-    /// waits for them (`MatchmakingGC2ClientHello`, 9110), as ValvePython's csgo `request_matchmaking_stats` does. They
-    /// are kept: [`matchmaking_stats`](Self::matchmaking_stats).
+    /// Asks the game coordinator for the account's matchmaking stats again, as the account's own profile
+    /// ([`player_profile`](Self::player_profile)), and keeps them: [`matchmaking_stats`](Self::matchmaking_stats).
+    ///
+    /// CS2's game coordinator no longer answers `MatchmakingClient2GCHello` (9109), which ValvePython's csgo
+    /// `request_matchmaking_stats` sends, nor sends `MatchmakingGC2ClientHello` (9110) after its welcome (both checked
+    /// live in November 2026), but it answers the profile request about the account itself.
     ///
     /// Fails as [`inspect`](Self::inspect) does.
     pub async fn request_matchmaking_stats(&mut self) -> Result<PlayerProfile> {
-        let request = CMsgGccStrike15V2MatchmakingClient2GcHello::default();
-        let stats = self
-            .request(MATCHMAKING_CLIENT_HELLO, &request, MATCHMAKING_HELLO, |message| {
-                Ok(Some(PlayerProfile::new(parse(message)?)))
-            })
-            .await?;
+        let stats = self.player_profile(self.account).await?;
         self.matchmaking_stats = Some(stats.clone());
         Ok(stats)
     }
