@@ -10,7 +10,7 @@
 //! `steamwire-tools nethook`). The dumps hold your public IP: don't share or commit them.
 //!
 //! ```sh
-//! cargo run -p steamwire-cs2 --example cs2_checks [-- --inspect <link>] [--profile <steam64>] [--match <code>]
+//! cargo run -p steamwire --features cs2 --example cs2_checks [-- --inspect <link>] [--profile <steam64>] [--match <code>]
 //! ```
 
 use qrcode::render::unicode;

@@ -7,7 +7,7 @@
 //! Prints counts only: no tokens, cookies, trade link token or secrets.
 //!
 //! ```sh
-//! cargo run -p steamwire-community --example community_checks [-- --mafile <path>]
+//! cargo run -p steamwire --features community --example community_checks [-- --mafile <path>]
 //! ```
 
 use qrcode::render::unicode;
