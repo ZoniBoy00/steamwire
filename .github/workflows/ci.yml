@@ -48,6 +48,17 @@ jobs:
         env:
           RUSTDOCFLAGS: -D warnings
 
+  # The docs as docs.rs builds them: nightly, every feature, `--cfg docsrs`.
+  docs-rs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@nightly
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo doc -p steamwire --no-deps --all-features
+        env:
+          RUSTDOCFLAGS: --cfg docsrs -D warnings
+
   msrv:
     runs-on: ubuntu-latest
     steps:

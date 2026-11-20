@@ -36,6 +36,8 @@ webui = []
 
 [package.metadata.docs.rs]
 all-features = true
+# Marks what each feature adds ("Available on crate feature ... only").
+rustdoc-args = ["--cfg", "docsrs"]
 
 [dependencies]
 prost.workspace = true
