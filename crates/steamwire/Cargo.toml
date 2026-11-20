@@ -19,6 +19,9 @@ default = ["native-tls"]
 # certificate store. One of them is needed for WebSocket and HTTPS.
 native-tls = ["tokio-tungstenite/native-tls", "reqwest/native-tls"]
 rustls = ["tokio-tungstenite/rustls-tls-native-roots", "reqwest/rustls"]
+# `client::testing::Loopback` for the other steamwire crates' tests: a client
+# on channels instead of a socket. Not part of the API.
+test-util = []
 
 [package.metadata.docs.rs]
 all-features = true

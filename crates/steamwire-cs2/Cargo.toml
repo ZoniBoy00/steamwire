@@ -29,6 +29,8 @@ tracing = "0.1"
 crc32fast = "1"
 
 [dev-dependencies]
+# The loopback client, for `Cs2::connect`'s tests.
+steamwire = { path = "../steamwire", default-features = false, features = ["test-util"] }
 bytes = "1"
 tokio = { workspace = true, features = ["test-util"] }
 qrcode = { version = "0.14", default-features = false }

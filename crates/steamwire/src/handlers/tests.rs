@@ -252,18 +252,6 @@ async fn guard_code_duplicate_request_is_success() {
     }
 }
 
-fn from_gc(app_id: u32, packet: &crate::messages::gc::GcPacket) -> ProtoMsg<steamwire_protos::steam::CMsgGcClient> {
-    ProtoMsg::new(
-        EMsg::ClientFromGC,
-        steamwire_protos::steam::CMsgGcClient {
-            appid: Some(app_id),
-            msgtype: Some(packet.wire_type()),
-            payload: Some(packet.encode()),
-            ..Default::default()
-        },
-    )
-}
-
 #[tokio::test]
 async fn gc_subscriptions_take_their_apps_messages() {
     use crate::messages::gc::GcPacket;
@@ -273,8 +261,8 @@ async fn gc_subscriptions_take_their_apps_messages() {
     assert_eq!(cs2.app_id(), 730);
 
     // The subscribed app's messages go to the subscription, others to the events.
-    steam.receive_proto(from_gc(730, &GcPacket::plain(4004, vec![1])));
-    steam.receive_proto(from_gc(440, &GcPacket::plain(4004, vec![2])));
+    steam.receive_gc(730, &GcPacket::plain(4004, vec![1]));
+    steam.receive_gc(440, &GcPacket::plain(4004, vec![2]));
     let msg = cs2.recv().await.unwrap();
     assert_eq!((msg.app_id, msg.msg_type(), &msg.packet.body[..]), (730, 4004, &[1][..]));
     assert!(matches!(cs2.try_recv(), Err(tokio::sync::mpsc::error::TryRecvError::Empty)));
@@ -285,12 +273,11 @@ async fn gc_subscriptions_take_their_apps_messages() {
     let client = steam.client.clone();
     let call = client.call_gc(730, GcPacket::plain(9000, vec![]), std::time::Duration::from_secs(5));
     let server = async {
-        let sent = steam.sent_of(EMsg::ClientToGC).await;
-        let sent: steamwire_protos::steam::CMsgGcClient = sent.decode().unwrap();
-        let request = GcPacket::parse(sent.msgtype(), sent.payload().to_vec().into()).unwrap();
+        let (app_id, request) = steam.sent_gc().await;
+        assert_eq!(app_id, 730);
         let mut reply = GcPacket::plain(9001, vec![3]);
         reply.set_target_job(request.source_job());
-        steam.receive_proto(from_gc(730, &reply));
+        steam.receive_gc(730, &reply);
     };
     let (reply, ()) = tokio::join!(call, server);
     assert_eq!(reply.unwrap().msg_type(), 9001);
@@ -301,7 +288,7 @@ async fn gc_subscriptions_take_their_apps_messages() {
     let second = steam.client.subscribe_gc(730);
     assert!(cs2.recv().await.is_none());
     drop(second);
-    steam.receive_proto(from_gc(730, &GcPacket::plain(4004, vec![4])));
+    steam.receive_gc(730, &GcPacket::plain(4004, vec![4]));
     let packet = steam.events.recv_msg(EMsg::ClientFromGC).await.unwrap();
     assert_eq!(super::game_coordinator::GcMessage::from_packet(&packet).unwrap().packet.body[..], [4]);
 

@@ -3,8 +3,9 @@
 mod config;
 mod events;
 mod job;
-#[cfg(test)]
-pub(crate) mod testing;
+#[cfg(any(test, feature = "test-util"))]
+#[doc(hidden)]
+pub mod testing;
 
 pub use config::Config;
 pub use events::{Event, Events};

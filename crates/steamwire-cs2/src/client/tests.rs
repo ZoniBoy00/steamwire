@@ -1194,3 +1194,119 @@ async fn asks_the_game_coordinator_for_the_inventory_again() {
     assert!(cs2.inventory().unwrap().is_none());
     gc.assert_refresh_sent();
 }
+
+// `connect` on a loopback client (a real `SteamClient` on channels): what it sends Steam, and how the game
+// coordinator's messages reach the session.
+
+mod connect {
+    use steamwire::client::testing::Loopback;
+    use steamwire::Packet;
+
+    use super::*;
+
+    /// Reads what the client sends Steam up to its first message to a game coordinator, which must be a hello to
+    /// CS2's. Returns the games played it sent before.
+    async fn played_then_hello(steam: &mut Loopback) -> Vec<Vec<u64>> {
+        let mut played = Vec::new();
+        let to_gc = loop {
+            let packet: Packet = steam.sent().await;
+            if packet.emsg == EMsg::ClientGamesPlayed {
+                let body: CMsgClientGamesPlayed = packet.decode().unwrap();
+                played.push(body.games_played.iter().map(|game| game.game_id()).collect());
+            } else if packet.emsg == EMsg::ClientToGC {
+                break packet.decode::<steamwire::protos::steam::CMsgGcClient>().unwrap();
+            }
+        };
+        let hello = GcPacket::parse(to_gc.msgtype(), Bytes::from(to_gc.payload.unwrap_or_default())).unwrap();
+        assert_eq!((to_gc.appid, hello.msg_type), (Some(APP_ID), CLIENT_HELLO));
+        assert_eq!(hello.decode::<CMsgClientHello>().unwrap(), super::super::hello());
+        played
+    }
+
+    fn welcome(steam: &Loopback, account: SteamId) {
+        steam.receive_gc(APP_ID, &GcPacket::proto(CLIENT_WELCOME, &welcome_with(account, &[])));
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn needs_a_logged_on_account() {
+        let steam = Loopback::new();
+        assert!(matches!(Cs2::connect(&steam.client).await, Err(Error::NotLoggedOn)));
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn plays_cs2_then_greets_until_welcomed() {
+        let account = SteamId::from_u64(OWNER);
+        let mut steam = Loopback::logged_on(account);
+        let client = steam.client.clone();
+        let steam_side = async {
+            // CS2 alone is played before any hello
+            assert_eq!(played_then_hello(&mut steam).await, [vec![u64::from(APP_ID)]]);
+            welcome(&steam, account);
+        };
+        let (cs2, ()) = soon(async { tokio::join!(Cs2::connect(&client), steam_side) }).await;
+        let mut cs2 = cs2.unwrap();
+        assert!(cs2.has_session());
+        assert_eq!(current_ids(&mut cs2), Vec::<u64>::new());
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn a_welcome_before_the_first_hello_is_taken() {
+        let account = SteamId::from_u64(OWNER);
+        let mut steam = Loopback::logged_on(account);
+        let client = steam.client.clone();
+        let steam_side = async {
+            // the game coordinator welcomes the account as soon as it plays CS2
+            steam.sent_of(EMsg::ClientGamesPlayed).await;
+            welcome(&steam, account);
+        };
+        let (cs2, ()) = soon(async { tokio::join!(Cs2::connect(&client), steam_side) }).await;
+        let cs2 = cs2.unwrap();
+        assert!(cs2.has_session());
+        // welcomed, so no hello was sent at all, and while the session lives, CS2's messages (the welcome too) don't
+        // go to the events
+        steam.receive_gc(APP_ID, &GcPacket::plain(4004, vec![1]));
+        steam.receive_gc(440, &GcPacket::plain(4004, vec![2]));
+        let packet = steam.events.recv_msg(EMsg::ClientFromGC).await.unwrap();
+        assert_eq!(GcMessage::from_packet(&packet).unwrap().app_id, 440);
+        assert!(!std::iter::from_fn(|| steam.try_sent()).any(|packet| packet.emsg == EMsg::ClientToGC));
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn takes_the_messages_of_an_earlier_subscription() {
+        let account = SteamId::from_u64(OWNER);
+        let mut steam = Loopback::logged_on(account);
+        let mut earlier = steam.client.subscribe_gc(APP_ID);
+        let client = steam.client.clone();
+        let steam_side = async {
+            played_then_hello(&mut steam).await;
+            welcome(&steam, account);
+        };
+        let (cs2, ()) = soon(async { tokio::join!(Cs2::connect(&client), steam_side) }).await;
+        assert!(cs2.unwrap().has_session());
+        assert!(earlier.recv().await.is_none());
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn ends_when_the_client_disconnects_while_greeting() {
+        let mut steam = Loopback::logged_on(SteamId::from_u64(OWNER));
+        let client = steam.client.clone();
+        let steam_side = async {
+            played_then_hello(&mut steam).await;
+            steam.close();
+        };
+        let (cs2, ()) = soon(async { tokio::join!(Cs2::connect(&client), steam_side) }).await;
+        assert!(matches!(cs2, Err(Error::Closed)));
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn fails_when_the_game_coordinator_refuses() {
+        let mut steam = Loopback::logged_on(SteamId::from_u64(OWNER));
+        let client = steam.client.clone();
+        let steam_side = async {
+            played_then_hello(&mut steam).await;
+            steam.receive_gc(APP_ID, &GcPacket::proto(LOGON_FATAL_ERROR, &fatal(5, "banned")));
+        };
+        let (cs2, ()) = soon(async { tokio::join!(Cs2::connect(&client), steam_side) }).await;
+        assert!(matches!(cs2, Err(Error::Refused { code: 5, .. })));
+    }
+}

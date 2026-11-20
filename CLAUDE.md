@@ -57,7 +57,9 @@ contain the user's public IP: never commit them or use them as fixtures.
   and item details, profiles, matches, the CS2 inventory. Built on
   `SteamClient::subscribe_gc`; no reconnecting (a disconnect is
   `Error::Closed`). Tested offline against a fake GC (`Link::Fake` in
-  `client.rs`). Connecting plays CS2 on the account: never run it live on
+  `client.rs`), and `Cs2::connect` on steamwire's loopback client
+  (`client::testing::Loopback`, exposed by the hidden `test-util` feature,
+  a dev-dependency only). Connecting plays CS2 on the account: never run it live on
   the user's account without their OK for that run.
 - `steamwire-tools`: the NetHook analyzer (dynamic decoding via prost-reflect
   over the descriptor sets) and the ProtobufDumper (library + CLI).

@@ -39,11 +39,6 @@ confirmations, purchases, and adding or removing the authenticator.
   - `steamwire-cs2` against the real game coordinator (`cs2_checks`):
     greeting, the inventory, the matchmaking stats, recent and live matches,
     and optionally inspecting, a friend's profile and a match by share code.
-- **`Cs2::connect` has no offline test.** The session's tests run on a fake
-  game coordinator below the client, so the `ClientGamesPlayed` sent on
-  connecting, subscribing before it and `Error::NotLoggedOn` are covered only
-  by the live check. A `#[doc(hidden)]` test feature on `steamwire` that
-  exposes its loopback client would cover them.
 - **Publish** `steamwire-protos`, `steamwire`, `steamwire-community` and
   `steamwire-cs2` to crates.io, in that order, once the checks above pass.
   `cargo package` already passes for all four. Publishing is permanent, so
