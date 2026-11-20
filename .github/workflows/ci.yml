@@ -42,8 +42,10 @@ jobs:
       - run: cargo clippy --workspace --all-targets
       - run: cargo clippy -p steamwire --no-default-features --all-targets
       - run: cargo clippy -p steamwire --no-default-features --features community,cs2 --all-targets
-      # Every feature: the game and web UI proto sets too.
-      - run: cargo clippy -p steamwire --all-features --all-targets
+      # Every feature: the game and web UI proto sets too. Not --all-targets:
+      # checking the library and its test build at once, each with every proto
+      # set, runs the runner out of memory; the tests are linted above.
+      - run: cargo clippy -p steamwire --all-features --lib --examples
       - run: cargo doc --workspace --no-deps --all-features
         env:
           RUSTDOCFLAGS: -D warnings
