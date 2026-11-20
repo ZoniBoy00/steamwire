@@ -6,9 +6,11 @@ promise of an API; items move as they're done or dropped.
 
 ## Next: what to test
 
-State on 2026-11-20: `community_checks` passes, and `cs2_checks` passes
-except `live matches`, which CS2's game coordinator didn't answer (not
-counted). Still not run live, all read-only and optional:
+State on 2026-11-20: `account_checks` passes with QR, credentials and the
+Steam Guard app confirmation or code; `community_checks` passes; and
+`cs2_checks` passes (matchmaking stats included) except `live matches`,
+which CS2's game coordinator didn't answer (not counted). Still not run
+live, all read-only and optional:
 
 - `community_checks -- --mafile <path>`: the pending confirmations.
 - `cs2_checks -- --inspect <link> --profile <friend's steam64> --match
@@ -21,7 +23,7 @@ confirmations, purchases, and adding or removing the authenticator.
 
 - **Publish** `steamwire` to crates.io, now that the live checks pass (the
   web side and CS2 are its `community` and `cs2` features).
-  `cargo package` already passes for all four. Publishing is permanent, so
+  `cargo package` already passes. Publishing is permanent, so
   it happens only on the maintainer's say-so: the release workflow
   publishes on the first green CI run on main once it's enabled again
   (`gh workflow enable Release`; the `CARGO_REGISTRY_TOKEN` secret is set).
