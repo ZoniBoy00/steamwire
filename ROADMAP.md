@@ -22,7 +22,9 @@ confirmations, purchases, and adding or removing the authenticator.
 - **Publish** `steamwire-protos`, `steamwire`, `steamwire-community` and
   `steamwire-cs2` to crates.io, in that order, now that the live checks pass.
   `cargo package` already passes for all four. Publishing is permanent, so
-  it happens only on the maintainer's say-so.
+  it happens only on the maintainer's say-so: the release workflow
+  publishes on the first green CI run on main once the
+  `CARGO_REGISTRY_TOKEN` secret is set.
 
 ## Verified only in part
 

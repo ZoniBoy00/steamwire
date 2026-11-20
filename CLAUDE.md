@@ -134,8 +134,14 @@ credentials login, Steam Guard and cloud.
 The crates are `steamwire-protos`, `steamwire`, `steamwire-community` and `steamwire-cs2` on crates.io (the project
 was called steamkit, but that name is taken there); `steamwire-tools` and `steamwire-nethook` are `publish = false`.
 `cargo package -p steamwire-protos -p steamwire -p steamwire-community -p steamwire-cs2`
-checks them before the dependencies are on crates.io; publish in that order. Nothing has been
-published yet: publishing is permanent, so only on the user's say-so.
+checks them before the dependencies are on crates.io; publish in that order.
+
+`.github/workflows/release.yml` publishes them: after a green CI run on main, any crate whose
+version isn't on crates.io yet is published (with the `CARGO_REGISTRY_TOKEN` secret), then
+`vX.Y.Z` is tagged with a GitHub release. So bumping the version and pushing to main releases:
+bump `[workspace.package] version` and every internal `version = "..."` together (the workflow
+fails otherwise), and only on the user's say-so, since publishing is permanent. Never handle the
+crates.io token.
 
 ## Roadmap
 

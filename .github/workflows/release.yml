@@ -1,0 +1,111 @@
+name: Release
+
+# Publishes the crates when CI passes on main with a version that isn't on
+# crates.io yet: bump `version` in the root Cargo.toml (and the internal
+# dependencies' `version = "..."`), push, and this publishes, tags vX.Y.Z and
+# makes a GitHub release. A version already on crates.io is skipped, so a
+# release that failed halfway finishes on the next run.
+#
+# Needs the repository secret CARGO_REGISTRY_TOKEN: a crates.io token with
+# the publish-new and publish-update scopes.
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+  # Run by hand to retry a release.
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+env:
+  CARGO_TERM_COLOR: always
+  # In publish order: each depends on the ones before it.
+  CRATES: steamwire-protos steamwire steamwire-community steamwire-cs2
+
+jobs:
+  publish:
+    # Only after a green CI run of a push to main (not of a pull request).
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+      # No third-party actions or caches in the job that holds the crates.io
+      # token: the runner's rustup installs the toolchain.
+      - name: Install Rust
+        run: rustup toolchain install stable --profile minimal && rustup default stable
+
+      - name: Read the version
+        id: version
+        run: |
+          version=$(cargo metadata --no-deps --format-version 1 \
+            | jq -r '.packages[] | select(.name == "steamwire") | .version')
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "Version $version"
+
+      - name: Check the internal dependencies' versions
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          # Every `steamwire*` dependency must ask for this version, or the
+          # crates on crates.io would depend on the previous one.
+          wrong=$(grep -nE '^steamwire[a-z-]* = \{.*version = "' crates/*/Cargo.toml \
+            | grep -v "version = \"$VERSION\"" || true)
+          if [ -n "$wrong" ]; then
+            echo "::error::Internal dependencies not at $VERSION:"
+            echo "$wrong"
+            exit 1
+          fi
+
+      - name: Publish what isn't on crates.io yet
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+        run: |
+          for crate in $CRATES; do
+            status=$(curl -s -o /dev/null -w '%{http_code}' \
+              -A "steamwire-release (github.com/${GITHUB_REPOSITORY})" \
+              "https://crates.io/api/v1/crates/$crate/$VERSION")
+            if [ "$status" = 200 ]; then
+              echo "$crate $VERSION is already on crates.io"
+              continue
+            fi
+            if [ -z "$CARGO_REGISTRY_TOKEN" ]; then
+              echo "::warning::$crate $VERSION isn't on crates.io, but the CARGO_REGISTRY_TOKEN secret is not set: nothing published"
+              exit 0
+            fi
+            # cargo waits until the crate is in the index before returning,
+            # so the next crate finds it.
+            cargo publish -p "$crate"
+          done
+
+      - name: Tag and make a GitHub release
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+          GH_TOKEN: ${{ github.token }}
+          SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+        run: |
+          tag="v$VERSION"
+          if gh release view "$tag" > /dev/null 2>&1; then
+            echo "Release $tag exists"
+            exit 0
+          fi
+          # Only once the version is on crates.io.
+          status=$(curl -s -o /dev/null -w '%{http_code}' \
+            -A "steamwire-release (github.com/${GITHUB_REPOSITORY})" \
+            "https://crates.io/api/v1/crates/steamwire-cs2/$VERSION")
+          if [ "$status" != 200 ]; then
+            echo "steamwire-cs2 $VERSION isn't on crates.io: no release"
+            exit 0
+          fi
+          gh release create "$tag" --target "$SHA" --title "$tag" --generate-notes
