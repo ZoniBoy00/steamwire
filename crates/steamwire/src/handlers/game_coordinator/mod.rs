@@ -5,8 +5,8 @@ use std::collections::HashMap;
 use std::sync::Mutex;
 use std::time::Duration;
 
+use crate::protos::steam::CMsgGcClient;
 use bytes::Bytes;
-use steamwire_protos::steam::CMsgGcClient;
 use tokio::sync::{mpsc, oneshot};
 
 use crate::client::SteamClient;

@@ -3,7 +3,7 @@
 use std::collections::{BTreeMap, HashMap};
 use std::sync::Mutex;
 
-use steamwire_protos::steam::{
+use crate::protos::steam::{
     c_msg_client_mms_get_lobby_list, CMsgClientMmsGetLobbyListResponse, CMsgClientMmsJoinLobbyResponse,
     CMsgClientMmsLeaveLobbyResponse, CMsgClientMmsLobbyData, CMsgClientMmsUserJoinedLobby, CMsgClientMmsUserLeftLobby,
     MmsKeyValuePair,

@@ -1,12 +1,13 @@
 [package]
 name = "steamwire"
-description = "Async Rust library for talking to the Steam network, based on SteamKit2."
+description = "Async Rust library for the Steam network, based on SteamKit2: the CM client, CDN, Web API, plus Steam's web side (trading, confirmations) and CS2's game coordinator as features."
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
 repository.workspace = true
 readme = "../../README.md"
+build = "build/main.rs"
 keywords = ["steam", "steamkit", "steamkit2", "valve", "protocol"]
 categories = ["api-bindings", "network-programming", "games"]
 # The fixtures are only for the repository's tests.
@@ -19,15 +20,24 @@ default = ["native-tls"]
 # certificate store. One of them is needed for WebSocket and HTTPS.
 native-tls = ["tokio-tungstenite/native-tls", "reqwest/native-tls"]
 rustls = ["tokio-tungstenite/rustls-tls-native-roots", "reqwest/rustls"]
-# `client::testing::Loopback` for the other steamwire crates' tests: a client
-# on channels instead of a socket. Not part of the API.
-test-util = []
+# Steam's web side (`community`): web sessions, trade offers, inventories,
+# mobile confirmations, the mobile authenticator and wallet purchases.
+community = []
+# Counter-Strike 2's game coordinator client (`cs2`).
+cs2 = ["csgo"]
+# The game coordinator messages of each game and the web UI services
+# (`protos::csgo`, ...), as in SteamKit2 (`SteamKit2.GC.*.Internal`,
+# `SteamKit2.WebUI.Internal`).
+csgo = []
+dota2 = []
+tf2 = []
+deadlock = []
+webui = []
 
 [package.metadata.docs.rs]
 all-features = true
 
 [dependencies]
-steamwire-protos = { path = "../steamwire-protos", version = "0.1.0" }
 prost.workspace = true
 tokio.workspace = true
 tokio-tungstenite = "0.30"
@@ -64,11 +74,32 @@ windows = { version = "0.62", features = [
     "Win32_System_Registry",
 ] }
 
+[build-dependencies]
+prost-build = "0.14"
+protoc-bin-vendored = "3"
+
 [dev-dependencies]
+tokio = { workspace = true, features = ["test-util"] }
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 qrcode = { version = "0.14", default-features = false }
 rpassword = "7"
 criterion = { version = "0.8", default-features = false }
+
+[[test]]
+name = "community_web"
+required-features = ["community"]
+
+[[test]]
+name = "community_authenticator"
+required-features = ["community"]
+
+[[example]]
+name = "community_checks"
+required-features = ["community"]
+
+[[example]]
+name = "cs2_checks"
+required-features = ["cs2"]
 
 [[bench]]
 name = "codecs"

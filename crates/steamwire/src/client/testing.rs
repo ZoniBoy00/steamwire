@@ -1,8 +1,5 @@
 //! A client wired to channels instead of a socket, for tests: messages from
 //! "Steam" are dispatched directly and what the client sends is read back.
-//!
-//! Also for the other steamwire crates' tests, behind the `test-util`
-//! feature. Not part of the API: it may change in any release.
 
 use bytes::Bytes;
 use prost::Message;
@@ -51,7 +48,7 @@ impl Loopback {
         let loopback = Self::new();
         let mut response = ProtoMsg::new(
             EMsg::ClientLogOnResponse,
-            steamwire_protos::steam::CMsgClientLogonResponse {
+            crate::protos::steam::CMsgClientLogonResponse {
                 eresult: Some(EResult::OK.0),
                 heartbeat_seconds: Some(9),
                 cell_id: Some(7),
@@ -84,7 +81,7 @@ impl Loopback {
     pub fn receive_gc(&self, app_id: u32, packet: &GcPacket) {
         self.receive_proto(ProtoMsg::new(
             EMsg::ClientFromGC,
-            steamwire_protos::steam::CMsgGcClient {
+            crate::protos::steam::CMsgGcClient {
                 appid: Some(app_id),
                 msgtype: Some(packet.wire_type()),
                 payload: Some(packet.encode()),
@@ -142,7 +139,7 @@ impl Loopback {
     /// skipping others. Returns the app and the message.
     pub async fn sent_gc(&mut self) -> (u32, GcPacket) {
         let packet = self.sent_of(EMsg::ClientToGC).await;
-        let msg: steamwire_protos::steam::CMsgGcClient = packet.decode().expect("a ClientToGC");
+        let msg: crate::protos::steam::CMsgGcClient = packet.decode().expect("a ClientToGC");
         let app_id = msg.appid();
         let gc = GcPacket::parse(msg.msgtype(), Bytes::from(msg.payload.unwrap_or_default())).expect("a GC packet");
         (app_id, gc)

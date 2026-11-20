@@ -1,6 +1,6 @@
 //! `IContentServerDirectoryService`: CDN server lists.
 
-use steamwire_protos::steam::{
+use crate::protos::steam::{
     CContentServerDirectoryGetServersForSteamPipeRequest, CContentServerDirectoryGetServersForSteamPipeResponse,
 };
 

@@ -126,7 +126,7 @@ fn protoc(include: &[&Path], files: &[&str], out: &Path) -> Vec<(String, Vec<u8>
 /// recompiles the output with protoc and checks nothing changed.
 #[test]
 fn protodump_round_trip() {
-    let protos = Path::new(env!("CARGO_MANIFEST_DIR")).join("../steamwire-protos/proto/steam");
+    let protos = Path::new(env!("CARGO_MANIFEST_DIR")).join("../steamwire/proto/steam");
     let dir = temp_dir("protodump");
     // Custom options, services, enums, nested types and imports.
     let files = [

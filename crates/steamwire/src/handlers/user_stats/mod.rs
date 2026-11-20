@@ -1,10 +1,10 @@
 //! Player counts and leaderboards (SteamKit2's `SteamUserStats`).
 
-use prost::Message;
-use steamwire_protos::steam::{
+use crate::protos::steam::{
     CMsgClientLbsFindOrCreateLb, CMsgClientLbsFindOrCreateLbResponse, CMsgClientLbsGetLbEntries,
     CMsgClientLbsGetLbEntriesResponse, CMsgDpGetNumberOfCurrentPlayers, CMsgDpGetNumberOfCurrentPlayersResponse,
 };
+use prost::Message;
 
 use crate::client::SteamClient;
 use crate::enums::{ELeaderboardDataRequest, ELeaderboardDisplayType, ELeaderboardSortMethod, EMsg, EResult};

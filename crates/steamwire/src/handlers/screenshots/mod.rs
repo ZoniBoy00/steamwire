@@ -1,6 +1,6 @@
 //! Screenshots (SteamKit2's `SteamScreenshots`).
 
-use steamwire_protos::steam::{CMsgClientUcmAddScreenshot, CMsgClientUcmAddScreenshotResponse};
+use crate::protos::steam::{CMsgClientUcmAddScreenshot, CMsgClientUcmAddScreenshotResponse};
 
 use crate::client::SteamClient;
 use crate::enums::{EMsg, EResult, EUCMFilePrivacyState};

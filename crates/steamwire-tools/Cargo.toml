@@ -14,7 +14,6 @@ path = "src/main.rs"
 
 [dependencies]
 steamwire = { path = "../steamwire", version = "0.1.0" }
-steamwire-protos = { path = "../steamwire-protos", version = "0.1.0" }
 prost.workspace = true
 prost-reflect = { version = "0.16", features = ["text-format"] }
 prost-types = "0.14"

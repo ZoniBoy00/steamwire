@@ -8,7 +8,7 @@ pub use callbacks::*;
 
 use std::collections::BTreeMap;
 
-use steamwire_protos::steam::{
+use crate::protos::steam::{
     c_msg_client_pics_product_info_request as req, c_msg_client_pics_product_info_response as resp,
     CMsgClientPicsAccessTokenRequest, CMsgClientPicsAccessTokenResponse, CMsgClientPicsProductInfoRequest,
     CMsgClientPicsProductInfoResponse,

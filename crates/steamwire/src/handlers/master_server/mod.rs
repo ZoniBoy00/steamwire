@@ -2,7 +2,7 @@
 
 use std::net::{IpAddr, Ipv4Addr, SocketAddr};
 
-use steamwire_protos::steam::{CMsgClientGmsServerQuery, CMsgGmsClientServerQueryResponse};
+use crate::protos::steam::{CMsgClientGmsServerQuery, CMsgGmsClientServerQueryResponse};
 
 use crate::client::SteamClient;
 use crate::enums::{EMsg, ERegionCode};

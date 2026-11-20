@@ -5,14 +5,14 @@ mod lobby;
 
 pub use lobby::{Filter, JoinLobby, Lobby, LobbyCache, Member, Metadata};
 
-use prost::Message;
-use steamwire_protos::steam::{
+use crate::protos::steam::{
     CMsgClientMmsCreateLobby, CMsgClientMmsCreateLobbyResponse, CMsgClientMmsGetLobbyData, CMsgClientMmsGetLobbyList,
     CMsgClientMmsGetLobbyListResponse, CMsgClientMmsInviteToLobby, CMsgClientMmsJoinLobby,
     CMsgClientMmsJoinLobbyResponse, CMsgClientMmsLeaveLobby, CMsgClientMmsLeaveLobbyResponse, CMsgClientMmsLobbyData,
     CMsgClientMmsSetLobbyData, CMsgClientMmsSetLobbyDataResponse, CMsgClientMmsSetLobbyOwner,
     CMsgClientMmsSetLobbyOwnerResponse, CMsgClientMmsUserJoinedLobby, CMsgClientMmsUserLeftLobby,
 };
+use prost::Message;
 
 use crate::client::SteamClient;
 use crate::enums::{EChatRoomEnterResponse, ELobbyType, EMsg, EResult};

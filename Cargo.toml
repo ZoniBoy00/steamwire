@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["crates/steamwire-protos", "crates/steamwire", "crates/steamwire-community", "crates/steamwire-cs2", "crates/steamwire-tools", "crates/steamwire-nethook"]
+members = ["crates/steamwire", "crates/steamwire-tools", "crates/steamwire-nethook"]
 exclude = ["fuzz"]
 
 [workspace.package]

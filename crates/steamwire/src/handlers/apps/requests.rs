@@ -1,4 +1,4 @@
-use steamwire_protos::steam::{
+use crate::protos::steam::{
     CMsgClientCheckAppBetaPassword, CMsgClientCheckAppBetaPasswordResponse, CMsgClientGetAppOwnershipTicket,
     CMsgClientGetAppOwnershipTicketResponse, CMsgClientGetDepotDecryptionKey, CMsgClientGetDepotDecryptionKeyResponse,
     CMsgClientPicsChangesSinceRequest, CMsgClientPicsChangesSinceResponse, CMsgClientPicsPrivateBetaRequest,

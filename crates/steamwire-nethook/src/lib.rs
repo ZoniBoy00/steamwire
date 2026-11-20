@@ -7,7 +7,7 @@
 //! The DLL exports `Inject` and `Eject` and uses `DllMain` as its entry point,
 //! so it's driven with `rundll32 "<path to dll>",Inject`.
 //!
-//! The protobuf types come from the `steamwire-protos` crate (imported as `steamkit_protos`).
+//! The protobuf types come from `steamwire::protos`.
 //!
 //! Adapted from the `steamwire-nethook` crate of steamkit-rs
 //! (<https://github.com/CottonIndustries/steamkit-rs>, commit `820bdeed`,

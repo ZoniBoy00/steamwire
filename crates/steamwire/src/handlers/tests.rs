@@ -3,14 +3,14 @@
 
 use std::io::Write as _;
 
-use prost::Message;
-use steamwire_protos::steam::{
+use crate::protos::steam::{
     c_msg_client_friends_list, c_msg_client_mms_lobby_data, c_msg_client_persona_state,
     CAuthenticationBeginAuthSessionViaCredentialsResponse, CAuthenticationGetPasswordRsaPublicKeyResponse,
     CAuthenticationUpdateAuthSessionWithSteamGuardCodeRequest,
     CAuthenticationUpdateAuthSessionWithSteamGuardCodeResponse, CMsgClientChangeStatus, CMsgClientFriendsList,
     CMsgClientMmsLobbyData, CMsgClientPersonaState, CMsgMulti,
 };
+use prost::Message;
 
 use super::auth::{AuthSessionDetails, GuardCodeType};
 use crate::client::testing::Loopback;

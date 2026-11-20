@@ -1,4 +1,4 @@
-use steamwire_protos::steam::CContentServerDirectoryServerInfo;
+use crate::protos::steam::CContentServerDirectoryServerInfo;
 
 /// HTTP or HTTPS.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash)]

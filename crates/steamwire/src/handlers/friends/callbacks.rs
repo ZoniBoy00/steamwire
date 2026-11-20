@@ -1,4 +1,4 @@
-use steamwire_protos::steam::{
+use crate::protos::steam::{
     c_msg_client_persona_state, CMsgClientAddFriendResponse, CMsgClientChatGetFriendMessageHistoryResponse,
     CMsgClientChatInvite, CMsgClientClanState, CMsgClientFriendMsgIncoming, CMsgClientFriendProfileInfoResponse,
     CMsgClientFriendsList, CMsgClientPersonaState, CMsgPersonaChangeResponse,

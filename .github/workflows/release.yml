@@ -1,10 +1,10 @@
 name: Release
 
-# Publishes the crates when CI passes on main with a version that isn't on
-# crates.io yet: bump `version` in the root Cargo.toml (and the internal
-# dependencies' `version = "..."`), push, and this publishes, tags vX.Y.Z and
-# makes a GitHub release. A version already on crates.io is skipped, so a
-# release that failed halfway finishes on the next run.
+# Publishes steamwire when CI passes on main with a version that isn't on
+# crates.io yet: bump `version` in the root Cargo.toml (and steamwire-tools'
+# `version = "..."` of it), push, and this publishes, tags vX.Y.Z and makes a
+# GitHub release. A version already on crates.io is skipped, so a release
+# that failed after publishing finishes on the next run.
 #
 # Needs the repository secret CARGO_REGISTRY_TOKEN: a crates.io token with
 # the publish-new and publish-update scopes.
@@ -26,8 +26,8 @@ concurrency:
 
 env:
   CARGO_TERM_COLOR: always
-  # In publish order: each depends on the ones before it.
-  CRATES: steamwire-protos steamwire steamwire-community steamwire-cs2
+  # The published crates, in publish order (each after those it depends on).
+  CRATES: steamwire
 
 jobs:
   publish:
@@ -118,9 +118,9 @@ jobs:
             exit 0
           fi
           # Only once the version is on crates.io.
-          status=$(curl -s -o /dev/null -w '%{http_code}' -A "steamwire-release (github.com/${GITHUB_REPOSITORY})" "https://crates.io/api/v1/crates/steamwire-cs2/$VERSION")
+          status=$(curl -s -o /dev/null -w '%{http_code}' -A "steamwire-release (github.com/${GITHUB_REPOSITORY})" "https://crates.io/api/v1/crates/steamwire/$VERSION")
           if [ "$status" != 200 ]; then
-            echo "steamwire-cs2 $VERSION isn't on crates.io: no release"
+            echo "steamwire $VERSION isn't on crates.io: no release"
             exit 0
           fi
           gh release create "$tag" --target "$SHA" --title "$tag" --generate-notes

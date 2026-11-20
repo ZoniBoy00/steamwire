@@ -18,12 +18,17 @@
 
 pub mod cdn;
 pub mod client;
+#[cfg(feature = "community")]
+pub mod community;
+#[cfg(feature = "cs2")]
+pub mod cs2;
 pub mod discovery;
 pub mod enums;
 mod error;
 pub mod handlers;
 pub mod messages;
 pub mod net;
+pub mod protos;
 pub mod types;
 pub mod util;
 pub mod webapi;
@@ -33,7 +38,6 @@ pub use enums::{EAccountType, EMsg, EPersonaState, EResult, EUniverse};
 pub use error::{Error, Result};
 pub use messages::{Packet, ProtoMsg};
 pub use net::{CmServer, NetHookListener, NetworkListener, ProtocolType};
-pub use steamwire_protos as protos;
-pub use steamwire_protos::steam::services;
+pub use protos::steam::services;
 pub use types::kv;
 pub use types::{GameId, JobId, SteamId};

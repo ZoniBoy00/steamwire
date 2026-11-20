@@ -2123,6 +2123,8 @@ dependencies = [
  "hex",
  "hmac",
  "prost",
+ "prost-build",
+ "protoc-bin-vendored",
  "qrcode",
  "rand",
  "reqwest",
@@ -2132,7 +2134,6 @@ dependencies = [
  "serde",
  "serde_json",
  "sha1",
- "steamwire-protos",
  "thiserror",
  "tokio",
  "tokio-tungstenite",
@@ -2142,57 +2143,14 @@ dependencies = [
 ]
 
 [[package]]
-name = "steamwire-community"
-version = "0.1.0"
-dependencies = [
- "base64",
- "futures-util",
- "hex",
- "prost",
- "qrcode",
- "rand",
- "reqwest",
- "serde",
- "serde_json",
- "steamwire",
- "thiserror",
- "tokio",
- "tracing",
-]
-
-[[package]]
-name = "steamwire-cs2"
-version = "0.1.0"
-dependencies = [
- "bytes",
- "crc32fast",
- "prost",
- "qrcode",
- "steamwire",
- "steamwire-protos",
- "thiserror",
- "tokio",
- "tracing",
-]
-
-[[package]]
 name = "steamwire-nethook"
 version = "0.1.0"
 dependencies = [
  "chrono",
  "flate2",
  "prost",
- "steamwire-protos",
+ "steamwire",
  "windows",
-]
-
-[[package]]
-name = "steamwire-protos"
-version = "0.1.0"
-dependencies = [
- "prost",
- "prost-build",
- "protoc-bin-vendored",
 ]
 
 [[package]]
@@ -2205,7 +2163,6 @@ dependencies = [
  "prost-types",
  "protoc-bin-vendored",
  "steamwire",
- "steamwire-protos",
 ]
 
 [[package]]

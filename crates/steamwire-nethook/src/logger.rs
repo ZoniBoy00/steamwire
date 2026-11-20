@@ -7,8 +7,8 @@ use std::sync::OnceLock;
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use prost::Message;
-use steamkit_protos::gc::CMsgProtoBufHeader;
-use steamkit_protos::steam::CMsgMulti;
+use steamwire::protos::gc::CMsgProtoBufHeader;
+use steamwire::protos::steam::CMsgMulti;
 use windows::core::PCSTR;
 use windows::Win32::Foundation::{CloseHandle, GENERIC_WRITE, HANDLE, MAX_PATH};
 use windows::Win32::Storage::FileSystem::{

@@ -1,6 +1,6 @@
 //! Steam Cloud (SteamKit2's `SteamCloud`), over the `Cloud` service.
 
-use steamwire_protos::steam::{
+use crate::protos::steam::{
     CCloudGetFileDetailsRequest, CCloudGetFileDetailsResponse, CCloudGetSingleFileInfoRequest,
     CCloudGetSingleFileInfoResponse, CCloudShareFileRequest, CCloudShareFileResponse,
 };

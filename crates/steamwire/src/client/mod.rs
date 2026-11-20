@@ -3,9 +3,8 @@
 mod config;
 mod events;
 mod job;
-#[cfg(any(test, feature = "test-util"))]
-#[doc(hidden)]
-pub mod testing;
+#[cfg(test)]
+pub(crate) mod testing;
 
 pub use config::Config;
 pub use events::{Event, Events};
@@ -16,11 +15,11 @@ use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::{Arc, Mutex, OnceLock};
 use std::time::Duration;
 
-use bytes::Bytes;
-use steamwire_protos::steam::{
+use crate::protos::steam::{
     CMsgClientHeartBeat, CMsgClientHello, CMsgClientLoggedOff, CMsgClientLogonResponse, CMsgClientSessionToken,
     CMsgIpAddress,
 };
+use bytes::Bytes;
 use tokio::sync::mpsc;
 use tokio::task::JoinHandle;
 

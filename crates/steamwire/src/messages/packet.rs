@@ -7,9 +7,9 @@
 //! * clear, for the `ChannelEncrypt*` messages: [`MsgHdr`] (20 bytes);
 //! * clear, otherwise: [`ExtendedClientMsgHdr`] (36 bytes).
 
+use crate::protos::steam::CMsgProtoBufHeader;
 use bytes::{Buf, BufMut, Bytes};
 use prost::Message;
-use steamwire_protos::steam::CMsgProtoBufHeader;
 
 use crate::enums::{EMsg, EResult};
 use crate::error::{Error, Result};
@@ -323,7 +323,7 @@ pub fn split_multi(packet: &Packet) -> Result<Vec<Packet>> {
 pub fn split_multi_raw(packet: &Packet) -> Result<Vec<Bytes>> {
     use std::io::Read;
 
-    let multi: steamwire_protos::steam::CMsgMulti = packet.decode()?;
+    let multi: crate::protos::steam::CMsgMulti = packet.decode()?;
     let size_unzipped = multi.size_unzipped();
     let body = multi.message_body.unwrap_or_default();
     let payload = if size_unzipped > 0 {
@@ -351,7 +351,7 @@ pub fn split_multi_raw(packet: &Packet) -> Result<Vec<Bytes>> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use steamwire_protos::steam::{CMsgClientHeartBeat, CMsgMulti};
+    use crate::protos::steam::{CMsgClientHeartBeat, CMsgMulti};
 
     #[test]
     fn proto_round_trip() {

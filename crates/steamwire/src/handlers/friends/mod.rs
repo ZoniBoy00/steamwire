@@ -10,7 +10,7 @@ mod callbacks;
 pub use cache::{avatar_url, Clan, Friend, FriendsCache};
 pub use callbacks::*;
 
-use steamwire_protos::steam::{
+use crate::protos::steam::{
     CMsgClientAddFriend, CMsgClientChangeStatus, CMsgClientChatGetFriendMessageHistory,
     CMsgClientChatGetFriendMessageHistoryForOfflineMessages, CMsgClientChatInvite, CMsgClientFriendMsg,
     CMsgClientFriendProfileInfo, CMsgClientFriendProfileInfoResponse, CMsgClientRemoveFriend,

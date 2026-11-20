@@ -1,6 +1,6 @@
 //! Workshop (SteamKit2's `SteamWorkshop`).
 
-use steamwire_protos::steam::{
+use crate::protos::steam::{
     CMsgClientUcmEnumeratePublishedFilesByUserAction, CMsgClientUcmEnumeratePublishedFilesByUserActionResponse,
 };
 

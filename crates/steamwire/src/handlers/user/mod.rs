@@ -6,7 +6,7 @@ pub use callbacks::*;
 
 use std::net::{IpAddr, Ipv4Addr};
 
-use steamwire_protos::steam::{
+use crate::protos::steam::{
     c_msg_ip_address, CMsgClientLogOff, CMsgClientLogon, CMsgClientLogonResponse, CMsgIpAddress,
 };
 

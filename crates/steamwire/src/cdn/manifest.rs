@@ -5,13 +5,13 @@ use std::cmp::Ordering;
 use std::collections::HashSet;
 use std::path::{MAIN_SEPARATOR, MAIN_SEPARATOR_STR};
 
-use base64::Engine;
-use prost::Message;
-use sha1::{Digest, Sha1};
-use steamwire_protos::steam::{
+use crate::protos::steam::{
     content_manifest_payload::{file_mapping, FileMapping},
     ContentManifestMetadata, ContentManifestPayload, ContentManifestSignature,
 };
+use base64::Engine;
+use prost::Message;
+use sha1::{Digest, Sha1};
 
 use crate::enums::EDepotFileFlag;
 use crate::error::{Error, Result};

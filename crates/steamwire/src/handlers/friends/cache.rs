@@ -5,7 +5,7 @@
 use std::collections::HashMap;
 use std::sync::Mutex;
 
-use steamwire_protos::steam::{
+use crate::protos::steam::{
     CMsgClientAccountInfo, CMsgClientFriendsList, CMsgClientPersonaState, CMsgClientRequestFriendData,
     CMsgPersonaChangeResponse,
 };

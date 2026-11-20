@@ -7,7 +7,7 @@ use std::sync::atomic::{AtomicU32, Ordering};
 use std::sync::Mutex;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
-use steamwire_protos::steam::{
+use crate::protos::steam::{
     CMsgAuthTicket, CMsgClientAuthList, CMsgClientAuthListAck, CMsgClientGameConnectTokens,
     CMsgClientTicketAuthComplete,
 };

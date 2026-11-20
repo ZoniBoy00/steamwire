@@ -5,7 +5,7 @@
 use std::future::Future;
 use std::io::{BufRead, Write};
 
-use steamwire_protos::steam::{CAuthenticationAllowedConfirmation, EAuthSessionGuardType};
+use crate::protos::steam::{CAuthenticationAllowedConfirmation, EAuthSessionGuardType};
 
 use super::{AuthTokens, CredentialsAuthSession, GuardCodeType};
 use crate::enums::EResult;

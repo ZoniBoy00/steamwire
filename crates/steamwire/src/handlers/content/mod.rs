@@ -1,7 +1,7 @@
 //! Content server directory calls (SteamKit2's `SteamContent`): CDN servers,
 //! manifest request codes and CDN auth tokens.
 
-use steamwire_protos::steam::{
+use crate::protos::steam::{
     CContentServerDirectoryGetCdnAuthTokenRequest, CContentServerDirectoryGetCdnAuthTokenResponse,
     CContentServerDirectoryGetManifestRequestCodeRequest, CContentServerDirectoryGetManifestRequestCodeResponse,
     CContentServerDirectoryGetServersForSteamPipeRequest, CContentServerDirectoryGetServersForSteamPipeResponse,

@@ -1,6 +1,6 @@
 //! Networking certificates (SteamKit2's `SteamNetworking`).
 
-use steamwire_protos::steam::{CMsgClientNetworkingCertReply, CMsgClientNetworkingCertRequest};
+use crate::protos::steam::{CMsgClientNetworkingCertReply, CMsgClientNetworkingCertRequest};
 
 use crate::client::SteamClient;
 use crate::enums::EMsg;

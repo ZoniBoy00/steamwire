@@ -1,6 +1,6 @@
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
-use steamwire_protos::steam::{
+use crate::protos::steam::{
     CMsgClientAccountInfo, CMsgClientEmailAddrInfo, CMsgClientLoggedOff, CMsgClientLogonResponse,
     CMsgClientPlayingSessionState, CMsgClientRequestWebApiAuthenticateUserNonceResponse, CMsgClientSessionToken,
     CMsgClientVanityUrlChangedNotification, CMsgClientWalletInfoUpdate,

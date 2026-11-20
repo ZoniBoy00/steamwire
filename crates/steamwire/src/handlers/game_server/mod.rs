@@ -2,7 +2,7 @@
 
 use std::net::Ipv4Addr;
 
-use steamwire_protos::steam::{
+use crate::protos::steam::{
     CMsgClientLogOff, CMsgClientLogon, CMsgClientTicketAuthComplete, CMsgGsServerType, CMsgGsStatusReply,
 };
 

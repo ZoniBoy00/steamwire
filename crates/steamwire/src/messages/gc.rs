@@ -2,9 +2,9 @@
 //! their own headers: [`MsgGcHdr`] (18 bytes, no `EMsg`) or a protobuf header
 //! from `gc.proto` (which differs from the CM one).
 
+use crate::protos::gc::CMsgProtoBufHeader as GcProtoHeader;
 use bytes::{Buf, BufMut, Bytes};
 use prost::Message;
-use steamwire_protos::gc::CMsgProtoBufHeader as GcProtoHeader;
 
 use super::PROTO_MASK;
 use crate::error::{Error, Result};
@@ -179,14 +179,14 @@ mod tests {
 
     #[test]
     fn proto_round_trip() {
-        let body = steamwire_protos::gc::CMsgProtoBufHeader { client_session_id: Some(3), ..Default::default() };
+        let body = crate::protos::gc::CMsgProtoBufHeader { client_session_id: Some(3), ..Default::default() };
         let mut packet = GcPacket::proto(4006, &body);
         packet.set_source_job(JobId(9));
         let wire = packet.encode();
         let back = GcPacket::parse(packet.wire_type(), Bytes::from(wire)).unwrap();
         assert_eq!(back.msg_type, 4006);
         assert_eq!(back.source_job(), JobId(9));
-        assert_eq!(back.decode::<steamwire_protos::gc::CMsgProtoBufHeader>().unwrap(), body);
+        assert_eq!(back.decode::<crate::protos::gc::CMsgProtoBufHeader>().unwrap(), body);
     }
 
     #[test]

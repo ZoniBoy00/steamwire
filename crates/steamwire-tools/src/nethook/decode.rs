@@ -1,6 +1,6 @@
 //! Turns a message into a [`Node`] tree (NetHookAnalyzer2's
 //! `NetHookItem_MessageReading`, `MessageTypeFinder` and specializations),
-//! decoding protobufs by reflection over steamwire-protos' descriptors.
+//! decoding protobufs by reflection over steamwire's protobuf descriptors (`steamwire::protos`).
 
 use bytes::Bytes;
 use prost::Message;
@@ -46,10 +46,10 @@ impl Default for Analyzer {
 }
 
 impl Analyzer {
-    /// An analyzer for the messages known to steamwire-protos.
+    /// An analyzer for the messages known to `steamwire::protos`.
     pub fn new() -> Self {
-        let steam = DescriptorPool::decode(steamwire_protos::STEAM_DESCRIPTOR_SET).expect("steam descriptors");
-        let gc = DescriptorPool::decode(steamwire_protos::GC_DESCRIPTOR_SET).expect("gc descriptors");
+        let steam = DescriptorPool::decode(steamwire::protos::STEAM_DESCRIPTOR_SET).expect("steam descriptors");
+        let gc = DescriptorPool::decode(steamwire::protos::GC_DESCRIPTOR_SET).expect("gc descriptors");
         Self { steam, gc }
     }
 

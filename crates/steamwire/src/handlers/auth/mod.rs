@@ -9,8 +9,7 @@ pub mod guard;
 
 use std::time::Duration;
 
-use base64::Engine as _;
-use steamwire_protos::steam::{
+use crate::protos::steam::{
     CAuthenticationAccessTokenGenerateForAppRequest, CAuthenticationAccessTokenGenerateForAppResponse,
     CAuthenticationAllowedConfirmation, CAuthenticationBeginAuthSessionViaCredentialsRequest,
     CAuthenticationBeginAuthSessionViaCredentialsResponse, CAuthenticationBeginAuthSessionViaQrRequest,
@@ -21,6 +20,7 @@ use steamwire_protos::steam::{
     CAuthenticationUpdateAuthSessionWithSteamGuardCodeResponse, EAuthSessionGuardType, EAuthTokenPlatformType,
     ESessionPersistence,
 };
+use base64::Engine as _;
 
 use crate::client::SteamClient;
 use crate::enums::{EOSType, EResult};

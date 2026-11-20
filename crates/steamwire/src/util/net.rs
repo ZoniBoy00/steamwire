@@ -2,8 +2,8 @@
 
 use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
 
-use steamwire_protos::steam::c_msg_ip_address::Ip;
-use steamwire_protos::steam::CMsgIpAddress;
+use crate::protos::steam::c_msg_ip_address::Ip;
+use crate::protos::steam::CMsgIpAddress;
 
 /// Converts an IP address to its message form.
 pub fn ip_to_msg(ip: IpAddr) -> CMsgIpAddress {

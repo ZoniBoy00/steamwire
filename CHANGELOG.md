@@ -4,8 +4,6 @@ All notable changes to the steamwire crates. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow
 [Semantic Versioning](https://semver.org/): before 1.0, a minor version
 (0.x) may break the API and a patch version (0.x.y) doesn't.
-`steamwire` and `steamwire-protos` are released together with the same
-version.
 
 ## [Unreleased]
 
@@ -23,18 +21,18 @@ version.
   `depot_download` (whole depots with parallel chunks and in-place
   updates), `machine_info`, and live checks for anonymous, account and
   two-account use.
-- `steamwire-community`: web sessions from a CM access token (renewed
+- `community` feature: web sessions from a CM access token (renewed
   through the client), trade offers, trade links and holds, inventories,
   mobile confirmations, adding and removing the mobile authenticator
   (`.maFile`), and the account cart with wallet-only purchases. Example
   `community_checks` (read-only live checks).
 - `types::ShareCode`: CS2 match share codes, from SteamHelper-rs.
-- `steamwire-protos` features `csgo`, `dota2`, `tf2`, `deadlock` and
+- Features `csgo`, `dota2`, `tf2`, `deadlock` and
   `webui`: the games' GC messages and the web UI services, as SteamKit2
   generates them.
 - `SteamClient::subscribe_gc`: one app's GC messages to a subscription
   instead of the events.
-- `steamwire-cs2`: CS2's game coordinator client, from SteamHelper-rs:
+- `cs2` feature: CS2's game coordinator client, from SteamHelper-rs:
   inspect links and item details, player profiles and matchmaking stats,
   match info by share code, recent and live matches, and the account's CS2
   inventory with change events. Example `cs2_checks` (read-only live
@@ -47,12 +45,12 @@ version.
 
 ### Fixed
 
-- `steamwire-community`: GETs follow redirects within Steam's websites
+- `community`: GETs follow redirects within Steam's websites
   with the session's cookies, so the trade link of an account with a
   custom profile URL is found (found live); other redirects are
   `Error::Redirected` with their target, and `is_logged_in` is true only
   when the account page itself answers.
-- `steamwire-cs2`: `request_matchmaking_stats` asks for the account's own
+- `cs2`: `request_matchmaking_stats` asks for the account's own
   profile, since CS2's game coordinator no longer answers
   `MatchmakingClient2GCHello` (found live).
 
