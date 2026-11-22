@@ -4,12 +4,6 @@ What's left to do, roughly in order. The [README](README.md) has what's
 done, and [CHANGELOG.md](CHANGELOG.md) has what changed. Nothing here is a
 promise of an API; items move as they're done or dropped.
 
-## 0.1.1
-
-- Release the packaging fix (in the CHANGELOG under Unreleased): bump the
-  version on the maintainer's say-so.
-- The read-only live checks below.
-
 ## 0.2.0: long-running bots and services
 
 - **Reconnecting, opt-in, in the library.** The `bot` example's loop as a

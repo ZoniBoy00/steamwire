@@ -7,6 +7,8 @@ All notable changes to the steamwire crates. The format follows
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-11-22
+
 ### Fixed
 
 - The published package has the test fixtures (`tests/data`) and the
