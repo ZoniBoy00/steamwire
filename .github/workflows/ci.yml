@@ -85,6 +85,15 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
       - run: cargo package -p steamwire
+      # The tests as a crates.io user runs them: from the packaged crate,
+      # outside this workspace (they also check that the fixtures are in it).
+      - name: Test the packaged crate
+        run: |
+          dir="$RUNNER_TEMP/package"
+          mkdir -p "$dir"
+          tar -xzf target/package/steamwire-*.crate -C "$dir"
+          cd "$dir"/steamwire-*
+          CARGO_TARGET_DIR="$GITHUB_WORKSPACE/target/package-test" cargo test --features community,cs2
 
   fuzz:
     name: fuzz (${{ matrix.target }}, 60 s)

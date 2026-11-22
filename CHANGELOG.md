@@ -7,6 +7,11 @@ All notable changes to the steamwire crates. The format follows
 
 ## [Unreleased]
 
+### Fixed
+
+- The published package has the test fixtures (`tests/data`) and the
+  benchmarks, so its tests pass when run from the `.crate`; CI tests it so.
+
 ## [0.1.0] - 2026-11-20
 
 ### Added

@@ -10,8 +10,6 @@ readme = "../../README.md"
 build = "build/main.rs"
 keywords = ["steam", "steamkit", "steamkit2", "valve", "protocol"]
 categories = ["api-bindings", "network-programming", "games"]
-# The fixtures are only for the repository's tests.
-exclude = ["tests/data", "benches"]
 
 [features]
 default = ["native-tls"]
